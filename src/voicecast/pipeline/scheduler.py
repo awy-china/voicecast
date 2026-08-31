@@ -50,16 +50,28 @@ def run_batch(
     cast: Cast,
     dry_run: bool = False,
     registry: EngineRegistry | None = None,
+    compliance_check=None,
 ) -> dict:
+    """compliance_check: Callable[[str], list[str]] | None —— 返回违规词列表则拦截。"""
     registry = registry or EngineRegistry()
     out_root = project.output_dir
     out_root.mkdir(parents=True, exist_ok=True)
 
     records: list[dict] = []
     ep_cost: dict[int, float] = {}
-    ok_count = error_count = planned_count = budget_skipped = 0
+    ok_count = error_count = planned_count = budget_skipped = blocked_count = 0
 
     for ln in script.lines:
+        if compliance_check:
+            hits = compliance_check(ln.text)
+            if hits:
+                blocked_count += 1
+                records.append({
+                    "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
+                    "role": ln.role, "text": ln.text, "emotion": ln.emotion,
+                    "status": "blocked", "error": f"违规词: {'、'.join(hits)}",
+                })
+                continue
         budget = project.budget_per_episode
         over_budget = budget > 0 and ep_cost.get(ln.episode, 0) >= budget
         if over_budget:
@@ -133,5 +145,6 @@ def run_batch(
         "total_cost": total_cost,
         "ok": ok_count, "error": error_count,
         "planned": planned_count, "budget_skipped": budget_skipped,
+        "blocked": blocked_count,
         "output_dir": str(out_root),
     }
