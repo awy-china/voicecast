@@ -23,9 +23,13 @@ def write_manifest(records: list[dict], output_dir: Path) -> Path:
 
     csv_path = output_dir / "manifest.csv"
     if records:
-        fields = list(records[0].keys())
+        fields: list[str] = []
+        for r in records:
+            for k in r:
+                if k not in fields:
+                    fields.append(k)
         with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
-            w = csv.DictWriter(f, fieldnames=fields)
+            w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
             w.writeheader()
             w.writerows(records)
     return json_path
