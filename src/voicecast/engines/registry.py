@@ -12,10 +12,11 @@ DEFAULT_ORDER = ["local", "edge_tts", "minimax"]
 
 
 class EngineRegistry:
-    def __init__(self) -> None:
+    def __init__(self, engines: list[Engine] | None = None) -> None:
         self._engines: dict[str, Engine] = {
             e.name: e
-            for e in [LocalEngine(), EdgeTTSEngine(), MiniMaxEngine()]
+            for e in (engines if engines is not None
+                      else [LocalEngine(), EdgeTTSEngine(), MiniMaxEngine()])
         }
 
     def all(self) -> list[Engine]:

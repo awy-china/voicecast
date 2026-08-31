@@ -1,0 +1,23 @@
+# 演示剧角色表（格式演示，与任何具体作品无关）
+title: 演示剧
+cast:
+  lin_feng:
+    name: 林锋
+    voice: male_young_sunny
+    default_emotion: 坚定
+    note: 青年男主
+  bai_yu:
+    name: 白钰
+    voice: female_warm
+    default_emotion: 温柔
+    note: 温婉女主
+  duan_ye:
+    name: 段爷
+    voice: minimax_villain
+    default_emotion: 阴险
+    note: 中年反派（需 MiniMax key，无 key 时该角色报错并记录）
+  ye_lao:
+    name: 叶老
+    voice: male_elderly
+    default_emotion: 慈祥
+    note: 沧桑老者

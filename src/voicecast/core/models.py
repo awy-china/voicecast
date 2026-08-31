@@ -10,7 +10,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class VoicecastError(Exception):
@@ -65,17 +65,18 @@ class VoiceProfile(BaseModel):
 class Role(BaseModel):
     """角色：引用一个 VoiceProfile + 角色级微调。"""
 
-    id: str
+    id: str = ""                     # 留空时由 Cast 从键名自动填充
     name: str
     voice: str                       # VoiceProfile.id
     default_emotion: str = "平静"
     pitch_offset: float = 0.0        # 角色级微调（叠加在配方参数上）
     speed_scale: float = 1.0
+    note: str = ""                   # 备注（如"青年男主"，不参与匹配）
 
     @field_validator("id")
     @classmethod
     def _id_ok(cls, v: str) -> str:
-        if not v or not v.replace("_", "").replace("-", "").isalnum():
+        if v and not v.replace("_", "").replace("-", "").isalnum():
             raise ValueError(f"非法角色 id: {v!r}")
         return v
 
@@ -85,6 +86,13 @@ class Cast(BaseModel):
 
     title: str = ""
     cast: dict[str, Role] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _fill_role_ids(self) -> "Cast":
+        for key, role in self.cast.items():
+            if not role.id:
+                role.id = key
+        return self
 
     def role(self, role_id: str) -> Role:
         try:
@@ -100,6 +108,7 @@ class ScriptLine(BaseModel):
     text: str
     emotion: str = "平静"
     scene: str = "S00"
+    episode: int = 1
     line_no: int = 0
     priority: int = 5                # 1-9，越大越重要
 
