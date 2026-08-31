@@ -16,6 +16,9 @@ outputs/
 *.wav
 *.mp3
 
+# 种子音色（可一键再生：voicecast seed）
+recipes/samples/seed/*.wav
+
 # 本地引擎模型
 models/
 *.ckpt
