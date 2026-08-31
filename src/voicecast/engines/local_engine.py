@@ -20,6 +20,33 @@ from .util import verify_audio
 
 MODELS_DIR = REPO_ROOT / "models" / "F5-TTS"
 
+_patched_load: bool = False
+
+
+def _patch_torchaudio_load() -> None:
+    """f5_tts 依赖 torchaudio.load 读参考音频；torchaudio 2.11 只有 torchcodec 后端
+    （Windows 下 torchcodec 缺 ffmpeg DLL 会崩）。用 soundfile 无缝替代：
+    参考音频均为 wav，soundfile 读取质量等同。幂等。"""
+    global _patched_load
+    if _patched_load:
+        return
+    import soundfile as sf
+    import torch
+    import torchaudio
+
+    orig = torchaudio.load
+
+    def load_patched(filepath, *args, **kwargs):
+        try:
+            return orig(filepath, *args, **kwargs)
+        except ImportError:
+            pass  # torchcodec 缺失/不可用 → 走 soundfile
+        wav, sr = sf.read(str(filepath), dtype="float32")
+        return torch.from_numpy(wav).unsqueeze(0), sr
+
+    torchaudio.load = load_patched
+    _patched_load = True
+
 
 class LocalEngine(Engine):
     name = "local"
@@ -27,7 +54,11 @@ class LocalEngine(Engine):
     _model = None
 
     def available(self) -> bool:
-        if not (MODELS_DIR / "model_1250000.pt").exists():
+        has_model = (
+            any(MODELS_DIR.rglob("*.pt"))
+            or any(MODELS_DIR.rglob("*.safetensors"))
+        )
+        if not has_model:
             return False
         try:
             import torch  # noqa: F401
@@ -39,7 +70,16 @@ class LocalEngine(Engine):
     def _get_model(self):
         if self._model is None:
             from f5_tts.api import F5TTS
-            self._model = F5TTS(device="cuda")
+
+            ckpt = MODELS_DIR / "F5TTS_v1_Base" / "model_1250000.safetensors"
+            vocab = MODELS_DIR / "F5TTS_v1_Base" / "vocab.txt"
+            self._model = F5TTS(
+                model="F5TTS_v1_Base",
+                ckpt_file=str(ckpt) if ckpt.exists() else "",
+                vocab_file=str(vocab) if vocab.exists() else "",
+                device="cuda",
+                hf_cache_dir=str(REPO_ROOT / "models" / "hf_cache"),  # vocos 落项目内，全离线
+            )
         return self._model
 
     def _resolve_ref(self, profile: VoiceProfile) -> Path | None:
@@ -58,19 +98,24 @@ class LocalEngine(Engine):
     ) -> Path:
         import soundfile as sf
 
+        _patch_torchaudio_load()
+        from ..design.seed import REF_TEXT as SEED_REF_TEXT
+
         ref_path = self._resolve_ref(profile)
+        if ref_path is None:
+            raise VoicecastError(f"本地引擎需要参考音频 ref_file（配方 {profile.id}）")
+        ref_text = str(profile.params.get("ref_text", "") or SEED_REF_TEXT)
         speed = float(profile.params.get("speed", 1.0))
         pitch_cents = float(profile.params.get("pitch", 0))
 
         model = self._get_model()
-        kwargs: dict = {"text": text}
-        if ref_path:
-            kwargs["ref_file"] = str(ref_path)
-        try:
-            wav, sr, _spec = model.infer(**kwargs, speed=speed)
-        except TypeError:
-            # 老版本 API 无 speed 参数
-            wav, sr, _spec = model.infer(**kwargs)
+        wav, sr, _spec = model.infer(
+            ref_file=str(ref_path),
+            ref_text=ref_text,
+            gen_text=text,
+            speed=speed,
+            remove_silence=True,
+        )
         sf.write(str(out_path), wav, sr)
 
         # pitch 微调：ffmpeg 变速变调（asetrate + atempo 保持时长）
