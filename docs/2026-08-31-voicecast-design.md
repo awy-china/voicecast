@@ -1,14 +1,14 @@
 # VoiceCast（声演工作室）— 项目设计文档
 
 - 日期：2026-08-31
-- 状态：**定稿待审**（已确认项目名 voicecast、显卡 RTX 5060；待用户过目后进入实施规划）
+- 状态：**定稿待审**（已确认项目名 voicecast、显卡 RTX 5060、独立性底线；待用户过目后进入实施规划）
 - 作者：Hermes × 用户（配音专家 × 逻辑学家协作产出）
 
 ---
 
 ## 1. 定位一句话
 
-> **以角色为中心的 AI 配音工作台**：描述/混合/微调"凭空设计"出想要的角色声音，用角色表锁死跨集一致性，剧本一键批量出可进剪映的分句音频。MiniMax 只是其中的一个可插拔引擎。
+> **以角色为中心的 AI 配音工作台**：描述/混合/微调"凭空设计"出想要的角色声音，用角色表锁死跨集一致性，剧本一键批量出可进剪映的分句音频。MiniMax 只是其中的一个可插拔引擎。**项目本体零供应商依赖，无任何 API key 也能全流程运行。**
 
 ## 2. 背景与立足点（为什么不是"第 N 个 TTS"）
 
@@ -94,10 +94,10 @@ voicecast/
 │   └── sliders.py             # 滑杆微调（年龄/低沉/语速/明亮）
 ├── engines/     ★引擎适配层（可插拔，统一接口）
 │   ├── base.py                # Engine 抽象：synthesize(text, voice_profile, emotion) → Audio
-│   ├── minimax_engine.py      # MiniMax t2a_v2（含 voice_clone）
-│   ├── edge_tts_engine.py     # edge-tts 免费打底
-│   ├── cosyvoice_engine.py    # 本地 CosyVoice2（二期）
-│   └── gpt_sovits_engine.py   # 本地 GPT-SoVITS（二期）
+│   ├── cosyvoice_engine.py    # 本地 CosyVoice2（默认主干，一期）
+│   ├── edge_tts_engine.py     # edge-tts 免费兜底（零 key）
+│   ├── gpt_sovits_engine.py   # 本地 GPT-SoVITS（可选，二期）
+│   └── minimax_engine.py      # MiniMax 可选插件（无 key 自动跳过）
 ├── pipeline/    剧本流水线
 │   ├── parser.py              # txt/JSON 剧本解析
 │   ├── router.py              # ★成本路由（见 §6）
@@ -110,6 +110,10 @@ voicecast/
 ```
 
 **关键架构决策：引擎适配层是灵魂**。统一接口 `Engine.synthesize()`，MiniMax / edge-tts / 本地引擎都是插件——这就是"混合路由"的落地点：不是又一个 API wrapper，而是**引擎无关的配音工作台**。
+
+**独立性原则（用户硬要求）**：项目不依赖任何单一供应商。默认主干 = 本地引擎（完全离线）；兜底 = edge-tts（零 key 免费）；MiniMax 仅可选插件，未配 key 路由自动跳过——**无任何 key 也能全流程跑通**。
+
+> ⚠️ **本地引擎 Windows 兼容性风险（已识别）**：CosyVoice2 官方依赖 pynini（仅 Linux），Windows 部署需先验证；备选 F5-TTS（pip 直装）或 GPT-SoVITS 整合包。适配层统一接口，引擎可随时换，不影响项目本体。
 
 ## 6. 成本路由规则（核心设计）
 
@@ -176,6 +180,8 @@ flowchart TD
 
 技术判断：**"文字描述→直接生成音色"中文生态不成熟**（ElevenLabs Voice Design 仅英文好用），所以走"LLM 翻译成配方"的务实路径——配方知识库冷启动数据 = **通用技术配方经验**（年龄/气质→底声+参数，见 recipes/），不依赖任何具体剧集资产。
 
+**种子音色库（自给自足）**：内置底声 = 用 edge-tts 中文音色（8 个）各生成一段标准参考文本，作为本地引擎零样本克隆的底声种子；用户可追加自有授权参考音频。这样"凭空设计"从种子库出发，全程零外部依赖。
+
 ## 8. 合规门禁（信任卖点 + GitHub 审核硬要求）
 
 | 门禁 | 内容 |
@@ -191,12 +197,12 @@ flowchart TD
 ## 10. MVP 范围（一期）与二期
 
 **一期（MVP）**：
-- core 数据模型 + engines（minimax + edge-tts）+ design（描述翻译器 + 滑杆）+ pipeline（txt/JSON 解析 + 成本路由 + 批量 + 归档）+ compliance（三项门禁）+ CLI + Gradio Web
+- core 数据模型 + engines（**CosyVoice2 本地主干 + edge-tts 免费兜底** + MiniMax 可选插件）+ design（描述翻译器 + 滑杆 + 种子音色库）+ pipeline（txt/JSON 解析 + 成本路由 + 批量 + 归档）+ compliance（三项门禁）+ CLI + Gradio Web
 - 验收：描述生成角色音色候选；示例剧本一键跑完；输出直接拖进剪映；成本可控（小成本验证 ≤ 2.5 元级起步）
 
 **二期**：
-- 本地引擎（CosyVoice2 / GPT-SoVITS）——**显卡已确认 RTX 5060，推理（约需 4-8GB 显存）无压力**
-- 混合插值、SRT/Excel 导入、自动混音、剪映草稿对接（按需）
+- GPT-SoVITS 增强克隆（本地，RTX 5060 推理无压力）、混合插值
+- SRT/Excel 导入、自动混音、剪映草稿对接（按需）
 
 ## 11. 技术栈
 
@@ -210,8 +216,9 @@ Python 3.11 + pydantic v2 + typer（CLI）+ gradio（Web）+ uv（包管理）+ 
 ## 13. 已确认决策
 
 1. **项目名/仓库名**：`voicecast`（声演工作室），位置 `D:\VoiceCast`
-2. **显卡**：RTX 5060 —— 二期本地引擎（CosyVoice2/GPT-SoVITS）推理可行
+2. **显卡**：RTX 5060 —— 一期本地引擎（CosyVoice2 推理约需 4-8GB 显存）无压力
 3. **配方库冷启动**：以通用技术配方（年龄/气质→底声+参数的通用经验，如：老年=Yunyang -32Hz/-14%、反派=0.85x/-4）为第一批数据，不依赖任何具体剧集；可选：用户提供通用参考音频（≥10s 自有授权声音）作克隆/混合的测试样本
+4. **独立性（用户硬要求）**：本地引擎为主（完全离线）、edge-tts 免费兜底（零 key）、MiniMax 可选插件——无 key 全流程可跑
 
 ## 14. 成功标准
 
