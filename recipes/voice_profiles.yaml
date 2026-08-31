@@ -1,0 +1,187 @@
+# VoiceCast 通用音色配方库（CC BY-NC 数据资产）
+# 通用技术配方：年龄/气质 → 底声 + 参数。不依赖任何具体剧集。
+# 冷启动数据源自 2026-08 实测配音经验（edge-tts 变调配方 / MiniMax 预设）。
+
+profiles:
+  # ============ edge-tts 免费底声（零 key，可完全离线前的主干） ============
+  - id: male_young_sunny
+    name: 青年阳光男声
+    description: 20-30岁正面男主，阳光清澈，语气明亮
+    design: recipe
+    params: { base_voice: zh-CN-YunxiNeural, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [青年, 男, 阳光]
+
+  - id: male_boy
+    name: 少年声
+    description: 14-16岁少年，稚气可爱
+    params: { base_voice: zh-CN-YunxiaNeural, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [少年, 男]
+
+  - id: male_young_gloomy
+    name: 青年迷茫沉郁
+    description: 20多岁青年，迷茫压抑、疲惫低沉
+    params: { base_voice: zh-CN-YunxiNeural, pitch: -17, speed: 0.93, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：-10~-24Hz + 慢速模拟沉郁" }
+    tags: [青年, 男, 低沉, 迷茫]
+
+  - id: male_mid_calm
+    name: 中年沉稳男声
+    description: 40-55岁稳重可靠，温厚
+    params: { base_voice: zh-CN-YunyangNeural, pitch: -20, speed: 0.90, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：-15~-25Hz + -8~-12%" }
+    tags: [中年, 男, 沉稳]
+
+  - id: male_mid_business
+    name: 中年有力商人
+    description: 45-55岁精明压迫感，商人/上位者
+    params: { base_voice: zh-CN-YunjianNeural, pitch: -19, speed: 0.93, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：-18~-20Hz + -6~-8%" }
+    tags: [中年, 男, 有力, 压迫, 商人]
+
+  - id: male_elderly
+    name: 老年沧桑男声
+    description: 60岁以上老者，沧桑缓慢
+    params: { base_voice: zh-CN-YunyangNeural, pitch: -32, speed: 0.86, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：Yunyang -32Hz/-14% 实测接近老年音" }
+    tags: [老年, 男, 沧桑]
+
+  - id: male_elderly_strong
+    name: 老年硬朗男声
+    description: 60岁以上硬朗老人，中气足
+    params: { base_voice: zh-CN-YunjianNeural, pitch: -35, speed: 0.88, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：Yunjian -35Hz/-12%" }
+    tags: [老年, 男, 硬朗]
+
+  - id: female_warm
+    name: 女声温柔
+    description: 20-35岁温柔女声，温暖知性
+    params: { base_voice: zh-CN-XiaoxiaoNeural, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [女, 温柔]
+
+  - id: female_lively
+    name: 女声活泼
+    description: 年轻活泼女声，俏皮
+    params: { base_voice: zh-CN-XiaoyiNeural, pitch: 0, speed: 1.05, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [女, 活泼, 年轻]
+
+  - id: female_kind_mid
+    name: 女声慈祥中年
+    description: 50-60岁慈祥大妈感
+    params: { base_voice: zh-CN-XiaoxiaoNeural, pitch: -12, speed: 0.92, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方：-12Hz + 慢速" }
+    tags: [女, 慈祥, 中年]
+
+  - id: female_dialect_liaoning
+    name: 辽宁方言女声
+    description: 东北口音女声
+    params: { base_voice: zh-CN-liaoning-XiaobeiNeural, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [女, 方言, 东北]
+
+  - id: female_dialect_shaanxi
+    name: 陕西方言女声
+    description: 陕西口音女声
+    params: { base_voice: zh-CN-shaanxi-XiaoniNeural, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: edge_tts }
+    provenance: { origin: synthetic, authorized: true, note: "通用技术配方（合成底声）" }
+    tags: [女, 方言, 陕西]
+
+  # ============ MiniMax 预设（可选插件，无 key 自动跳过） ============
+  - id: minimax_female_brisk
+    name: 女声爽利
+    description: 50岁劳动女性，利落干脆
+    params: { base_voice: female-chengshu, pitch: 1, speed: 1.06, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 female-chengshu + 稍快" }
+    tags: [女, 爽利, 中年]
+
+  - id: minimax_female_maiden
+    name: 少女声
+    description: 15-20岁少女，清纯
+    params: { base_voice: female-shaonv, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 female-shaonv" }
+    tags: [女, 少女]
+
+  - id: minimax_female_yujie
+    name: 御姐声
+    description: 成熟气场女声，御姐
+    params: { base_voice: female-yujie, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 female-yujie" }
+    tags: [女, 御姐, 成熟]
+
+  - id: minimax_female_sweet
+    name: 甜美声
+    description: 甜美可爱女声
+    params: { base_voice: female-tianmei, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 female-tianmei" }
+    tags: [女, 甜美]
+
+  - id: minimax_male_clear
+    name: 青年清澈男声
+    description: 青年清澈，干净
+    params: { base_voice: male-qn-qingse, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 male-qn-qingse" }
+    tags: [青年, 男, 清澈]
+
+  - id: minimax_male_badao
+    name: 霸道男声
+    description: 霸道总裁感
+    params: { base_voice: male-qn-badao, pitch: 0, speed: 1.0, volume: 1.0 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "MiniMax 预设 male-qn-badao" }
+    tags: [男, 霸道, 总裁]
+
+  - id: minimax_villain
+    name: 反派阴险男声
+    description: 中年反派，阴险算计（建议搭配克隆真人底声效果更佳）
+    params: { base_voice: male-qn-badao, pitch: -4, speed: 0.85, volume: 1.1 }
+    engine: { host: minimax }
+    provenance: { origin: synthetic, authorized: true, note: "实测配方：0.75~0.90x 慢速 + -1~-4 低沉 + 1.0~1.2 加重" }
+    tags: [反派, 男, 阴险]
+
+  # ============ 本地引擎种子（完全离线，参考音频在 recipes/samples/seed/） ============
+  - id: local_seed_yunxi
+    name: 本地-青年男（种子）
+    description: 基于云希种子的本地克隆底声，完全离线
+    design: preset
+    params: { ref_file: samples/seed/zh-CN-YunxiNeural.wav }
+    engine: { host: local }
+    provenance: { origin: synthetic, authorized: true, note: "edge-tts 合成种子，本地引擎零样本克隆底声" }
+    tags: [本地, 青年, 男]
+
+  - id: local_seed_yunyang
+    name: 本地-中年男（种子）
+    description: 基于云扬种子的本地克隆底声，完全离线
+    design: preset
+    params: { ref_file: samples/seed/zh-CN-YunyangNeural.wav }
+    engine: { host: local }
+    provenance: { origin: synthetic, authorized: true, note: "edge-tts 合成种子，本地引擎零样本克隆底声" }
+    tags: [本地, 中年, 男]
+
+  - id: local_seed_xiaoxiao
+    name: 本地-女声（种子）
+    description: 基于晓晓种子的本地克隆底声，完全离线
+    design: preset
+    params: { ref_file: samples/seed/zh-CN-XiaoxiaoNeural.wav }
+    engine: { host: local }
+    provenance: { origin: synthetic, authorized: true, note: "edge-tts 合成种子，本地引擎零样本克隆底声" }
+    tags: [本地, 女]
