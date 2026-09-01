@@ -195,7 +195,7 @@ def _batch_run(script_path: str, cast_path: str, out_dir: str, budget: float, dr
             progress(done / total, desc=f"[{done}/{total}] {icon} {rec['role']} · {rec.get('engine', '—')}{err}")
 
         r = run_batch(project, s, c, dry_run=dry, compliance_check=check_text, on_line=on_line)
-        progress(1.0, desc="完成")
+        progress(1.0, desc="✅ 完成")
         rows = [
             [rec.get("line_no"), rec.get("episode"), rec.get("role"), rec.get("status"),
              rec.get("engine", ""), rec.get("file", ""), rec.get("error", "")]
@@ -242,6 +242,8 @@ def build_app() -> gr.Blocks:
             [design_tab(), cast_tab(), batch_tab()],
             ["音色设计器", "角色表", "批量配音"],
         )
+    # 必须开 queue：gr.Progress 进度条靠 queue 的事件流推送，不开则进度静默丢失
+    demo.queue(default_concurrency_limit=1)
     return demo
 
 
