@@ -283,13 +283,14 @@ def batch_tab() -> gr.Blocks:
 # ---------------- 入口 ----------------
 
 def build_app() -> gr.Blocks:
-    with gr.Blocks(title="VoiceCast 声演工作室") as demo:
-        gr.Markdown("# 🎙️ VoiceCast 声演工作室\n本地优先、零供应商依赖的 AI 配音工作台")
-        gr.TabbedInterface(
-            [design_tab(), cast_tab(), batch_tab()],
-            ["音色设计器", "角色表", "批量配音"],
-        )
-    # 必须开 queue：gr.Progress 进度条靠 queue 的事件流推送，不开则进度静默丢失
+    """TabbedInterface 本身就是 Blocks，绝不能再包一层 gr.Blocks——
+    嵌套会导致 UI 双份渲染（用户点的按钮是未绑事件的副本，点击无效）。"""
+    demo = gr.TabbedInterface(
+        [design_tab(), cast_tab(), batch_tab()],
+        ["音色设计器", "角色表", "批量配音"],
+        title="VoiceCast 声演工作室",
+    )
+    # 必须开 queue：流式输出（generator yield）与 gr.Progress 都靠 queue 推送
     demo.queue(default_concurrency_limit=1)
     return demo
 
