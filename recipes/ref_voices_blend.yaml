@@ -1,0 +1,26 @@
+profiles:
+- id: blend_aishell3_SSB0016_aishell3_SSB0309
+  name: 融合·真人参考·女·青年×真人参考·女·老年
+  design: recipe
+  params:
+    ref_audio_path: samples\ref\aishell3_SSB0016_ref.wav
+    aux_ref_audio_paths:
+    - samples\ref\aishell3_SSB0309_SSB03090042.wav
+    speed: 1.0
+    pitch: 0.0
+  engine:
+    host: gpt_sovits
+    prefer_local: true
+    fallback:
+    - local
+  provenance:
+    origin: synthetic
+    authorized: true
+    ref_file: null
+    note: ''
+  tags:
+  - 女
+  - 青年
+  - 老年
+  - 融合
+  description: ''

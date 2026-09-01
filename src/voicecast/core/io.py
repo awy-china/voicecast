@@ -20,8 +20,11 @@ def load_yaml(path: Path | str) -> Any:
 def save_yaml(data: Any, path: Path | str) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+    # 原子写：先 dump 到内存（失败不截断文件），再写临时文件后替换
+    text = yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
+    tmp = path.with_suffix(".yaml.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(path)
 
 
 def load_json(path: Path | str) -> Any:
@@ -51,7 +54,11 @@ def load_recipe_library() -> dict[str, VoiceProfile]:
             continue
         found = True
         raw = load_yaml(c) if c.suffix == ".yaml" else load_json(c)
+        if not isinstance(raw, dict):
+            continue  # 空/损坏文件跳过，不崩
         items = raw.get("profiles", raw) if isinstance(raw, dict) else raw
+        if not items:
+            continue
         for item in items:
             p = VoiceProfile.model_validate(item)
             profiles[p.id] = p

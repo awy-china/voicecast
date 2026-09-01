@@ -62,10 +62,20 @@ class GPTSovitsEngine(Engine):
             txt_path = ref_path.with_suffix(".txt")
             if txt_path.exists():
                 prompt_text = txt_path.read_text(encoding="utf-8").strip()
+        # 多说话人音色融合：aux_ref_audio_paths 相对 recipes/ 解析
+        aux = []
+        for a in p.get("aux_ref_audio_paths", []) or []:
+            ap = Path(a)
+            if not ap.is_absolute():
+                from ..core.settings import RECIPES_DIR as _R
+
+                ap = _R / ap
+            aux.append(str(ap))
         payload = {
             "text": text,
             "text_lang": str(p.get("text_lang", "zh")),
             "ref_audio_path": ref,
+            "aux_ref_audio_paths": aux,
             "prompt_text": prompt_text,
             "prompt_lang": str(p.get("prompt_lang", "zh")),
             "speed_factor": speed,

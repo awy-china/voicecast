@@ -10,6 +10,7 @@ from rich.table import Table
 
 from ..compliance import clone_gate_check, provenance_check
 from ..core.models import Project, VoicecastError
+from ..design.blender import blend_recipe, save_blend
 from ..design.candidate_gen import generate_voice
 from ..design.seed import generate_seed_library
 from ..engines.registry import EngineRegistry
@@ -59,6 +60,29 @@ def design_cmd(
         f"({r['engine']}) {r['reason']}\n"
         f"        [dim]{r['audio']}[/dim]"
     )
+
+
+@app.command("blend")
+def blend_cmd(
+    main: str = typer.Argument(..., help="主参考配方 id（提供韵律骨架），如 aishell3_SSB0016"),
+    aux: list[str] = typer.Argument(..., help="辅助参考配方 id（渗入音色特征），可多个"),
+    save: bool = typer.Option(False, "--save", help="试听后保存为融合配方"),
+    probe: str = typer.Option("这就是我的声音。你看，像不像你心里想的那个角色？", "--probe", help="探测句"),
+) -> None:
+    """音色混合器：主参考 × 辅助参考 → 融合出独特新音色（GPT-SoVITS 多说话人融合）。"""
+    from rich.status import Status
+
+    with console.status(f"🎧 融合中：{main} × {' + '.join(aux)}…（首次推理约 1 分钟）", spinner="dots"):
+        r = blend_recipe(main, aux, probe_text=probe)
+    if not r.get("ok"):
+        console.print(f"[red]❌ 融合失败:[/red] {r.get('error', '未知错误')}")
+        return
+    console.print(f"[green]✅ 融合音色已生成:[/green] {r['audio']}")
+    console.print(f"  配方: [bold]{r['profile'].id}[/bold]（{r['profile'].name}）")
+    console.print(f"  标签: {r['profile'].tags}")
+    if save:
+        path = save_blend(r["profile"])
+        console.print(f"[green]✅ 已保存:[/green] {path}（规则引擎/批量配音可用）")
 
 
 @app.command("run")
