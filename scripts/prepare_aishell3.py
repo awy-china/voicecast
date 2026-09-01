@@ -31,7 +31,7 @@ MIN_LEN, MAX_LEN = 8, 34  # 句长（字符）范围
 
 
 def extract() -> None:
-    if DATA.exists():
+    if (EXTRACT / "train").exists():
         print("已解压，跳过")
         return
     print("解压中（约 25GB）…")
@@ -40,28 +40,37 @@ def extract() -> None:
     print("解压完成")
 
 
+def data_dir() -> Path:
+    """ModelScope 打包为扁平结构（无 data_aishell3 子层）；官方包有子层。防御两者。"""
+    if (EXTRACT / "data_aishell3").exists():
+        return EXTRACT / "data_aishell3"
+    return EXTRACT
+
+
 def parse_speakers() -> dict[str, dict]:
-    """speaker.info: speaker_id \\t gender \\t age"""
-    info_path = DATA / "speaker.info"
+    """spk-info.txt: speaker_id \\t age_group(A/B/C/D) \\t gender \\t accent"""
+    info_path = data_dir() / "spk-info.txt"
     speakers: dict[str, dict] = {}
     for line in info_path.read_text(encoding="utf-8").splitlines():
         parts = line.strip().split("\t")
-        if len(parts) >= 2:
-            sid = parts[0]
-            speakers[sid] = {"gender": parts[1], "age": parts[2] if len(parts) > 2 else "unknown"}
+        if len(parts) >= 4 and not parts[0].startswith("#"):
+            speakers[parts[0]] = {
+                "age": parts[1], "gender": parts[2], "accent": parts[3],
+            }
     return speakers
 
 
-def load_texts(speaker: str) -> dict[str, str]:
-    """txt/{speaker}.txt: wav_id \\t 汉字文本 \\t 拼音"""
-    txt_path = DATA / "train" / "txt" / f"{speaker}.txt"
+def load_all_texts() -> dict[str, str]:
+    """content.txt 全量索引：wav_id \\t '字 拼音 字 拼音 …' → 提取汉字串。"""
+    content = data_dir() / "train" / "content.txt"
     out: dict[str, str] = {}
-    if not txt_path.exists():
-        return out
-    for line in txt_path.read_text(encoding="utf-8").splitlines():
+    for line in content.read_text(encoding="utf-8").splitlines():
         parts = line.strip().split("\t")
-        if len(parts) >= 2:
-            out[parts[0]] = parts[1]
+        if len(parts) < 2:
+            continue
+        tokens = parts[1].split()
+        hanzi = "".join(tokens[i] for i in range(0, len(tokens), 2))
+        out[parts[0]] = hanzi
     return out
 
 
@@ -73,8 +82,10 @@ def main() -> None:
 
     speakers = parse_speakers()
     print(f"说话人总数: {len(speakers)}")
+    texts = load_all_texts()
+    print(f"文本索引: {len(texts)} 条")
 
-    # 分桶：gender × age
+    # 分桶：gender × age（A<14/B14-25/C26-40/D>41）
     buckets: dict[tuple[str, str], list[str]] = {}
     for sid, meta in speakers.items():
         buckets.setdefault((meta["gender"], meta["age"]), []).append(sid)
@@ -93,18 +104,19 @@ def main() -> None:
         for sid in sids:
             if picked >= MAX_SPEAKERS_PER_BUCKET:
                 break
-            texts = load_texts(sid)
-            cand = [(wid, t) for wid, t in texts.items() if MIN_LEN <= len(t) <= MAX_LEN]
+            # 该说话人的候选句：按句长过滤，从全量索引按说话人前缀取
+            cand = [(wid, t) for wid, t in texts.items()
+                    if wid.startswith(sid) and MIN_LEN <= len(t) <= MAX_LEN]
             if len(cand) < SEGS_PER_SPEAKER:
                 continue
             cand = sorted(cand, key=lambda x: len(x[1]))[:: max(1, len(cand) // 10)][:SEGS_PER_SPEAKER]
-            wav_dir = DATA / "train" / "wav" / sid
+            wav_dir = data_dir() / "train" / "wav" / sid
             got = 0
             for wid, text in cand:
-                src = wav_dir / f"{wid}.wav"
+                src = wav_dir / wid  # wid 已含 .wav 后缀（content.txt 键格式）
                 if not src.exists():
                     continue
-                out_name = f"aishell3_{sid}_{wid}"
+                out_name = f"aishell3_{sid}_{Path(wid).stem}"
                 if out_name in seen:
                     continue
                 seen.add(out_name)
@@ -149,9 +161,7 @@ def main() -> None:
 
 
 AGE_MAP = {
-    "teens": "少年", "twenties": "青年", "thirties": "青年",
-    "forties": "中年", "fifties": "中年", "sixties": "老年",
-    "unknown": "成人",
+    "A": "少年", "B": "青年", "C": "中年", "D": "老年", "unknown": "成人",
 }
 GENDER_MAP = {"male": "男", "female": "女", "other": "中性"}
 

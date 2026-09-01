@@ -1,0 +1,609 @@
+# 参考音频配方（自动生成自 scripts/prepare_aishell3.py）
+# 数据源 AISHELL-3（Apache-2.0）：真实人声，含性别/年龄标注。
+# ref_text 自动读取 samples/ref/<同名>.txt；wav 本体不入 git（见 .gitignore）。
+profiles:
+- id: aishell3_SSB0011
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0011_SSB00110012.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0011（female/C，Apache-2.0）
+- id: aishell3_SSB0016
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0016_SSB00160001.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0016（female/B，Apache-2.0）
+- id: aishell3_SSB0073
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0073_SSB00730002.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0073（male/B，Apache-2.0）
+- id: aishell3_SSB0139
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0139_SSB01390002.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0139（male/B，Apache-2.0）
+- id: aishell3_SSB0241
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0241_SSB02410024.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0241（male/B，Apache-2.0）
+- id: aishell3_SSB0261
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0261_SSB02610004.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0261（male/C，Apache-2.0）
+- id: aishell3_SSB0267
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0267_SSB02670005.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0267（female/C，Apache-2.0）
+- id: aishell3_SSB0273
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0273_SSB02730026.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0273（male/B，Apache-2.0）
+- id: aishell3_SSB0288
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0288_SSB02880068.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0288（female/C，Apache-2.0）
+- id: aishell3_SSB0309
+  name: 真人参考·女·老年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0309_SSB03090042.wav
+  tags:
+  - 女
+  - 老年
+  - 真人参考
+  note: AISHELL-3 SSB0309（female/D，Apache-2.0）
+- id: aishell3_SSB0316
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0316_SSB03160003.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0316（male/B，Apache-2.0）
+- id: aishell3_SSB0341
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0341_SSB03410006.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0341（female/C，Apache-2.0）
+- id: aishell3_SSB0354
+  name: 真人参考·女·老年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0354_SSB03540039.wav
+  tags:
+  - 女
+  - 老年
+  - 真人参考
+  note: AISHELL-3 SSB0354（female/D，Apache-2.0）
+- id: aishell3_SSB0366
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0366_SSB03660001.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0366（female/B，Apache-2.0）
+- id: aishell3_SSB0375
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0375_SSB03750011.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0375（male/B，Apache-2.0）
+- id: aishell3_SSB0380
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0380_SSB03800004.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0380（female/B，Apache-2.0）
+- id: aishell3_SSB0393
+  name: 真人参考·女·少年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0393_SSB03930023.wav
+  tags:
+  - 女
+  - 少年
+  - 真人参考
+  note: AISHELL-3 SSB0393（female/A，Apache-2.0）
+- id: aishell3_SSB0395
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0395_SSB03950022.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0395（female/B，Apache-2.0）
+- id: aishell3_SSB0407
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0407_SSB04070005.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0407（male/C，Apache-2.0）
+- id: aishell3_SSB0415
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0415_SSB04150004.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0415（female/B，Apache-2.0）
+- id: aishell3_SSB0434
+  name: 真人参考·男·老年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0434_SSB04340055.wav
+  tags:
+  - 男
+  - 老年
+  - 真人参考
+  note: AISHELL-3 SSB0434（male/D，Apache-2.0）
+- id: aishell3_SSB0534
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0534_SSB05340006.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0534（female/C，Apache-2.0）
+- id: aishell3_SSB0539
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0539_SSB05390004.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0539（female/C，Apache-2.0）
+- id: aishell3_SSB0578
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0578_SSB05780002.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0578（female/B，Apache-2.0）
+- id: aishell3_SSB0588
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0588_SSB05880011.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0588（female/B，Apache-2.0）
+- id: aishell3_SSB0590
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0590_SSB05900009.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0590（male/C，Apache-2.0）
+- id: aishell3_SSB0599
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0599_SSB05990126.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0599（female/C，Apache-2.0）
+- id: aishell3_SSB0606
+  name: 真人参考·女·老年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0606_SSB06060001.wav
+  tags:
+  - 女
+  - 老年
+  - 真人参考
+  note: AISHELL-3 SSB0606（female/D，Apache-2.0）
+- id: aishell3_SSB0609
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0609_SSB06090003.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0609（male/C，Apache-2.0）
+- id: aishell3_SSB0614
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0614_SSB06140001.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0614（female/C，Apache-2.0）
+- id: aishell3_SSB0629
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0629_SSB06290008.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0629（male/B，Apache-2.0）
+- id: aishell3_SSB0631
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0631_SSB06310021.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0631（male/B，Apache-2.0）
+- id: aishell3_SSB0632
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0632_SSB06320064.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0632（female/B，Apache-2.0）
+- id: aishell3_SSB0666
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0666_SSB06660002.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0666（female/C，Apache-2.0）
+- id: aishell3_SSB0668
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0668_SSB06680004.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0668（female/B，Apache-2.0）
+- id: aishell3_SSB0671
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0671_SSB06710002.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0671（female/C，Apache-2.0）
+- id: aishell3_SSB0686
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0686_SSB06860002.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0686（female/B，Apache-2.0）
+- id: aishell3_SSB0710
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0710_SSB07100003.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0710（male/C，Apache-2.0）
+- id: aishell3_SSB0737
+  name: 真人参考·女·老年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0737_SSB07370002.wav
+  tags:
+  - 女
+  - 老年
+  - 真人参考
+  note: AISHELL-3 SSB0737（female/D，Apache-2.0）
+- id: aishell3_SSB0762
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0762_SSB07620008.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0762（female/B，Apache-2.0）
+- id: aishell3_SSB0784
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0784_SSB07840018.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB0784（male/C，Apache-2.0）
+- id: aishell3_SSB0966
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB0966_SSB09660004.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB0966（male/B，Apache-2.0）
+- id: aishell3_SSB1100
+  name: 真人参考·男·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1100_SSB11000016.wav
+  tags:
+  - 男
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB1100（male/C，Apache-2.0）
+- id: aishell3_SSB1125
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1125_SSB11250036.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1125（female/B，Apache-2.0）
+- id: aishell3_SSB1136
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1136_SSB11360002.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1136（male/B，Apache-2.0）
+- id: aishell3_SSB1161
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1161_SSB11610033.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1161（female/B，Apache-2.0）
+- id: aishell3_SSB1366
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1366_SSB13660107.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB1366（female/C，Apache-2.0）
+- id: aishell3_SSB1448
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1448_SSB14480070.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1448（male/B，Apache-2.0）
+- id: aishell3_SSB1624
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1624_SSB16240017.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1624（male/B，Apache-2.0）
+- id: aishell3_SSB1625
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1625_SSB16250005.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB1625（female/C，Apache-2.0）
+- id: aishell3_SSB1684
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1684_SSB16840099.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1684（male/B，Apache-2.0）
+- id: aishell3_SSB1699
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1699_SSB16990074.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB1699（female/C，Apache-2.0）
+- id: aishell3_SSB1828
+  name: 真人参考·女·中年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1828_SSB18280063.wav
+  tags:
+  - 女
+  - 中年
+  - 真人参考
+  note: AISHELL-3 SSB1828（female/C，Apache-2.0）
+- id: aishell3_SSB1837
+  name: 真人参考·女·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1837_SSB18370041.wav
+  tags:
+  - 女
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1837（female/B，Apache-2.0）
+- id: aishell3_SSB1863
+  name: 真人参考·男·青年
+  engine:
+    host: local
+  params:
+    ref_file: samples/ref/aishell3_SSB1863_SSB18630036.wav
+  tags:
+  - 男
+  - 青年
+  - 真人参考
+  note: AISHELL-3 SSB1863（male/B，Apache-2.0）
