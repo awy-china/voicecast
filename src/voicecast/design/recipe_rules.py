@@ -58,10 +58,23 @@ def _searchable(profile: VoiceProfile) -> str:
     ).lower()
 
 
+def _voice_key(profile: VoiceProfile) -> str:
+    """底声去重键：同一底声只允许进一个候选（保证候选音色互不相同）。"""
+    if profile.params.get("base_voice"):
+        return f"base:{profile.params['base_voice']}"
+    if profile.params.get("ref_file"):
+        return f"ref:{profile.params['ref_file']}"
+    return f"id:{profile.id}"
+
+
 def match_candidates(
     description: str, top_k: int = 3, library: dict[str, VoiceProfile] | None = None
 ) -> list[tuple[VoiceProfile, int, list[str]]]:
-    """返回 [(profile, 得分, 命中词)]，按得分降序。"""
+    """返回 [(profile, 得分, 命中词)]，按得分降序，底声互不重复。
+
+    底声去重：同一 base_voice / ref_file 只保留得分最高的一个候选——
+    保证一次生成的候选音色明显不同，避免"相似描述→相同音色"。
+    """
     library = library or load_recipe_library()
     desc = description.lower()
 
@@ -93,20 +106,36 @@ def match_candidates(
 
     scored.sort(key=lambda x: -x[1])
 
+    # 底声去重：按分数取候选，同一底声只取一个（音色区分度）
+    selected: list[tuple[VoiceProfile, int, list[str]]] = []
+    seen_voices: set[str] = set()
+    for item in scored:
+        key = _voice_key(item[0])
+        if key in seen_voices:
+            continue
+        seen_voices.add(key)
+        selected.append(item)
+        if len(selected) >= top_k:
+            break
+
     # 补足：命中不足 top_k 时，从同性别/未命中的配方里补齐，
-    # 只补当前可用引擎的配方——保证"设置几个就出几个"
-    if len(scored) < top_k:
-        seen = {p.id for p, _s, _h in scored}
+    # 只补当前可用引擎、且底声未重复的配方——保证"设置几个就出几个"
+    if len(selected) < top_k:
+        seen_ids = {p.id for p, _s, _h in selected}
         for profile in library.values():
-            if len(scored) >= top_k:
+            if len(selected) >= top_k:
                 break
-            if profile.id in seen:
+            if profile.id in seen_ids:
                 continue
             if gender_hint and gender_hint not in profile.tags and gender_hint not in profile.name:
                 continue
             if not _engine_available(profile):
                 continue
-            scored.append((profile, 1, ["补充候选（相关性较低）"]))
-            seen.add(profile.id)
+            vkey = _voice_key(profile)
+            if vkey in seen_voices:
+                continue
+            seen_voices.add(vkey)
+            seen_ids.add(profile.id)
+            selected.append((profile, 1, ["补充候选（相关性较低）"]))
 
-    return scored[:top_k]
+    return selected[:top_k]

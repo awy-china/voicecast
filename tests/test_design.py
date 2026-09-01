@@ -27,6 +27,32 @@ def test_rules_fill_to_top_k():
     assert "female_warm" in ids
 
 
+def test_rules_candidates_have_distinct_voices():
+    """候选底声互不重复：一次生成的音色明显不同（多样性）。"""
+    top = match_candidates("反派中年男声，低沉阴险", top_k=5)
+    voices = [
+        (p.params.get("base_voice") or p.params.get("ref_file") or p.id)
+        for p, _s, _h in top
+    ]
+    assert len(voices) == len(set(voices)), f"底声重复: {voices}"
+    assert len(top) == 5
+
+
+def test_similar_descriptions_keep_ordering_stable_but_distinct():
+    """相似描述：核心候选稳定（相关性强），但候选集合底声不重复。"""
+    a = match_candidates("反派中年男声，低沉阴险", top_k=3)
+    b = match_candidates("阴险的中年反派男人，低沉", top_k=3)
+    ids_a = [p.id for p, _s, _h in a]
+    ids_b = [p.id for p, _s, _h in b]
+    # 相关性最强的候选应保持一致（同义描述本质相同）
+    assert ids_a[0] == ids_b[0]
+    # 每个候选集合内部底声不重复
+    for ids in (ids_a, ids_b):
+        profiles = [p for p, _s, _h in (a if ids is ids_a else b)]
+        voices = [p.params.get("base_voice") or p.params.get("ref_file") for p in profiles]
+        assert len(voices) == len(set(voices))
+
+
 def test_rules_find_warm_female():
     top = match_candidates("温柔女声", top_k=3)
     ids = [p.id for p, _s, _h in top]
