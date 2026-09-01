@@ -121,7 +121,7 @@ def run_batch(
             try:
                 engine.synthesize(ln.text, profile, out_path, emotion=ln.emotion)
                 break
-            except VoicecastError as e:
+            except Exception as e:  # noqa: BLE001  引擎异常统一转记录，不中断整批
                 last_err = str(e)
                 if attempt < RETRIES:
                     time.sleep(RETRY_DELAY * (attempt + 1))

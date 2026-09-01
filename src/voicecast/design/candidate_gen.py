@@ -46,7 +46,7 @@ def generate_candidates(
             on_progress((i - 0.5) / max(n, 1), f"正在生成候选 {i}/{n}：{profile.id}…")
         try:
             engine = registry.route(profile)
-        except VoicecastError as e:
+        except Exception as e:  # noqa: BLE001
             errors.append(f"{profile.id}: {e}")
             continue
         path = out_dir / f"{i:02d}_{profile.id}.wav"
@@ -61,7 +61,7 @@ def generate_candidates(
                 "reason": cand["reason"],
                 "params": profile.params,
             })
-        except VoicecastError as e:
+        except Exception as e:  # noqa: BLE001  任何引擎异常都不中断流程
             errors.append(f"{profile.id}: {e}")
 
     result["candidates"] = candidates

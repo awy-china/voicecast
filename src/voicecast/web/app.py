@@ -33,7 +33,6 @@ def _refresh_choices(_msg: str):
 def _design_go(description: str, top_k: int, progress=gr.Progress()):
     """流式设计器：候选逐个生成、逐个出现（不依赖进度条，实时可见）。"""
     global _last_design
-    from ..core.models import VoicecastError
     from ..core.settings import OUTPUTS_DIR
     from ..design.candidate_gen import PROBE_TEXT, _slug
     from ..design.recipe_translator import RecipeTranslator
@@ -70,7 +69,7 @@ def _design_go(description: str, top_k: int, progress=gr.Progress()):
                 "engine": engine.name, "engine_explain": engine.explain(),
                 "reason": cand["reason"], "params": profile.params,
             })
-        except VoicecastError as e:
+        except Exception as e:  # noqa: BLE001  任何引擎异常都不崩 UI，记录跳过
             _last_design["errors"].append(f"{profile.id}: {e}")
 
         outs = [None] * MAX_CANDIDATES + [""] * MAX_CANDIDATES

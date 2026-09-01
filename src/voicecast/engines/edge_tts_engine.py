@@ -32,6 +32,8 @@ class EdgeTTSEngine(Engine):
     def synthesize(
         self, text: str, profile: VoiceProfile, out_path: Path, emotion: str = ""
     ) -> Path:
+        import time
+
         import edge_tts
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,12 +49,25 @@ class EdgeTTSEngine(Engine):
         pch = f"{pitch:+.0f}Hz"
         volume = f"{(vol - 1) * 100:+.0f}%"
 
-        mp3 = out_path.with_suffix(".mp3")
-        asyncio.run(
-            edge_tts.Communicate(text, base, rate=rate, pitch=pch, volume=volume).save(
-                str(mp3)
+        # NoAudioReceived 是 edge-tts 经典间歇性错误（服务端限流/抖动）→ 重试 3 次
+        last_err: Exception | None = None
+        for attempt in range(3):
+            mp3 = out_path.with_suffix(".mp3")
+            mp3.unlink(missing_ok=True)
+            try:
+                asyncio.run(
+                    edge_tts.Communicate(text, base, rate=rate, pitch=pch,
+                                         volume=volume).save(str(mp3))
+                )
+                break
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+        else:
+            raise VoicecastError(
+                f"edge-tts 生成失败（重试3次后仍失败，可能是限流或参数错误）: {last_err}"
             )
-        )
         try:
             subprocess.run(
                 ["ffmpeg", "-y", "-i", str(mp3), "-ar", "24000", "-ac", "1",
