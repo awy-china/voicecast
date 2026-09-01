@@ -1,13 +1,13 @@
-# 参考音频配方（自动生成自 scripts/prepare_aishell3.py）
-# 数据源 AISHELL-3（Apache-2.0）：真实人声，含性别/年龄标注。
-# ref_text 自动读取 samples/ref/<同名>.txt；wav 本体不入 git（见 .gitignore）。
+# 参考音频配方（自动生成：prepare_aishell3.py + build_gptsovits_refs.py）
+# 数据源 AISHELL-3（Apache-2.0）。ref 指向 3-10s 拼接参考（GPT-SoVITS 兼容）。
+# wav 本体不入 git（.gitignore）；ref_text 自动读 samples/ref/<同名>.txt。
 profiles:
 - id: aishell3_SSB0011
   name: 真人参考·女·中年
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0011_SSB00110012.wav
+    ref_file: samples/ref/aishell3_SSB0011_ref.wav
   tags:
   - 女
   - 中年
@@ -18,7 +18,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0016_SSB00160001.wav
+    ref_file: samples/ref/aishell3_SSB0016_ref.wav
   tags:
   - 女
   - 青年
@@ -29,7 +29,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0073_SSB00730002.wav
+    ref_file: samples/ref/aishell3_SSB0073_ref.wav
   tags:
   - 男
   - 青年
@@ -40,7 +40,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0139_SSB01390002.wav
+    ref_file: samples/ref/aishell3_SSB0139_ref.wav
   tags:
   - 男
   - 青年
@@ -51,7 +51,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0241_SSB02410024.wav
+    ref_file: samples/ref/aishell3_SSB0241_ref.wav
   tags:
   - 男
   - 青年
@@ -62,7 +62,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0261_SSB02610004.wav
+    ref_file: samples/ref/aishell3_SSB0261_ref.wav
   tags:
   - 男
   - 中年
@@ -73,7 +73,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0267_SSB02670005.wav
+    ref_file: samples/ref/aishell3_SSB0267_ref.wav
   tags:
   - 女
   - 中年
@@ -84,7 +84,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0273_SSB02730026.wav
+    ref_file: samples/ref/aishell3_SSB0273_ref.wav
   tags:
   - 男
   - 青年
@@ -117,7 +117,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0316_SSB03160003.wav
+    ref_file: samples/ref/aishell3_SSB0316_ref.wav
   tags:
   - 男
   - 青年
@@ -128,7 +128,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0341_SSB03410006.wav
+    ref_file: samples/ref/aishell3_SSB0341_ref.wav
   tags:
   - 女
   - 中年
@@ -139,7 +139,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0354_SSB03540039.wav
+    ref_file: samples/ref/aishell3_SSB0354_ref.wav
   tags:
   - 女
   - 老年
@@ -150,7 +150,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0366_SSB03660001.wav
+    ref_file: samples/ref/aishell3_SSB0366_ref.wav
   tags:
   - 女
   - 青年
@@ -161,7 +161,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0375_SSB03750011.wav
+    ref_file: samples/ref/aishell3_SSB0375_ref.wav
   tags:
   - 男
   - 青年
@@ -172,7 +172,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0380_SSB03800004.wav
+    ref_file: samples/ref/aishell3_SSB0380_ref.wav
   tags:
   - 女
   - 青年
@@ -183,7 +183,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0393_SSB03930023.wav
+    ref_file: samples/ref/aishell3_SSB0393_ref.wav
   tags:
   - 女
   - 少年
@@ -194,7 +194,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0395_SSB03950022.wav
+    ref_file: samples/ref/aishell3_SSB0395_ref.wav
   tags:
   - 女
   - 青年
@@ -205,7 +205,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0407_SSB04070005.wav
+    ref_file: samples/ref/aishell3_SSB0407_ref.wav
   tags:
   - 男
   - 中年
@@ -227,7 +227,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0434_SSB04340055.wav
+    ref_file: samples/ref/aishell3_SSB0434_ref.wav
   tags:
   - 男
   - 老年
@@ -249,7 +249,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0539_SSB05390004.wav
+    ref_file: samples/ref/aishell3_SSB0539_ref.wav
   tags:
   - 女
   - 中年
@@ -260,7 +260,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0578_SSB05780002.wav
+    ref_file: samples/ref/aishell3_SSB0578_ref.wav
   tags:
   - 女
   - 青年
@@ -271,7 +271,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0588_SSB05880011.wav
+    ref_file: samples/ref/aishell3_SSB0588_ref.wav
   tags:
   - 女
   - 青年
@@ -282,7 +282,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0590_SSB05900009.wav
+    ref_file: samples/ref/aishell3_SSB0590_ref.wav
   tags:
   - 男
   - 中年
@@ -304,7 +304,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0606_SSB06060001.wav
+    ref_file: samples/ref/aishell3_SSB0606_ref.wav
   tags:
   - 女
   - 老年
@@ -326,7 +326,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0614_SSB06140001.wav
+    ref_file: samples/ref/aishell3_SSB0614_ref.wav
   tags:
   - 女
   - 中年
@@ -348,7 +348,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0631_SSB06310021.wav
+    ref_file: samples/ref/aishell3_SSB0631_ref.wav
   tags:
   - 男
   - 青年
@@ -359,7 +359,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0632_SSB06320064.wav
+    ref_file: samples/ref/aishell3_SSB0632_ref.wav
   tags:
   - 女
   - 青年
@@ -381,7 +381,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0668_SSB06680004.wav
+    ref_file: samples/ref/aishell3_SSB0668_ref.wav
   tags:
   - 女
   - 青年
@@ -392,7 +392,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0671_SSB06710002.wav
+    ref_file: samples/ref/aishell3_SSB0671_ref.wav
   tags:
   - 女
   - 中年
@@ -403,7 +403,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0686_SSB06860002.wav
+    ref_file: samples/ref/aishell3_SSB0686_ref.wav
   tags:
   - 女
   - 青年
@@ -425,7 +425,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0737_SSB07370002.wav
+    ref_file: samples/ref/aishell3_SSB0737_ref.wav
   tags:
   - 女
   - 老年
@@ -436,7 +436,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0762_SSB07620008.wav
+    ref_file: samples/ref/aishell3_SSB0762_ref.wav
   tags:
   - 女
   - 青年
@@ -447,7 +447,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0784_SSB07840018.wav
+    ref_file: samples/ref/aishell3_SSB0784_ref.wav
   tags:
   - 男
   - 中年
@@ -458,7 +458,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB0966_SSB09660004.wav
+    ref_file: samples/ref/aishell3_SSB0966_ref.wav
   tags:
   - 男
   - 青年
@@ -469,7 +469,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1100_SSB11000016.wav
+    ref_file: samples/ref/aishell3_SSB1100_ref.wav
   tags:
   - 男
   - 中年
@@ -480,7 +480,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1125_SSB11250036.wav
+    ref_file: samples/ref/aishell3_SSB1125_ref.wav
   tags:
   - 女
   - 青年
@@ -491,7 +491,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1136_SSB11360002.wav
+    ref_file: samples/ref/aishell3_SSB1136_ref.wav
   tags:
   - 男
   - 青年
@@ -513,7 +513,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1366_SSB13660107.wav
+    ref_file: samples/ref/aishell3_SSB1366_ref.wav
   tags:
   - 女
   - 中年
@@ -535,7 +535,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1624_SSB16240017.wav
+    ref_file: samples/ref/aishell3_SSB1624_ref.wav
   tags:
   - 男
   - 青年
@@ -568,7 +568,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1699_SSB16990074.wav
+    ref_file: samples/ref/aishell3_SSB1699_ref.wav
   tags:
   - 女
   - 中年
@@ -590,7 +590,7 @@ profiles:
   engine:
     host: local
   params:
-    ref_file: samples/ref/aishell3_SSB1837_SSB18370041.wav
+    ref_file: samples/ref/aishell3_SSB1837_ref.wav
   tags:
   - 女
   - 青年

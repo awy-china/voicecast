@@ -68,7 +68,7 @@ class GPTSovitsEngine(Engine):
         for _attempt in range(2):
             try:
                 r = httpx.post(
-                    f"{self.base_url}/tts", data=payload,
+                    f"{self.base_url}/tts", json=payload,  # FastAPI Pydantic 模型 → JSON body
                     timeout=self.timeout, follow_redirects=True,
                 )
                 r.raise_for_status()
