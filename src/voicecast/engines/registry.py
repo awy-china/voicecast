@@ -32,16 +32,22 @@ class EngineRegistry:
         return [e for e in self._engines.values() if e.available()]
 
     def route(self, profile: VoiceProfile, order: list[str] | None = None) -> Engine:
-        """规则一（硬约束）：音色归谁就走谁；auto 则按成本序取第一个可用。"""
+        """规则一（硬约束）：音色归谁就走谁；auto 则按成本序取第一个可用。
+        宿主不可用时按 profile.engine.fallback 降级链兜底（如 GPT-SoVITS 服务
+        未启动 → local），绝不因可选引擎缺席而报错。"""
         order = order or DEFAULT_ORDER
         host = profile.engine.host
         if host != "auto":
             eng = self._engines.get(host)
-            if eng is None:
-                raise VoicecastError(f"未知引擎: {host}")
-            if not eng.available():
+            if eng is None or not eng.available():
+                # 宿主不可用 → 降级链
+                for fb in profile.engine.fallback or []:
+                    feng = self._engines.get(fb)
+                    if feng and feng.available():
+                        return feng
                 raise VoicecastError(
                     f"宿主引擎 {host} 不可用（未安装模型/未配置 key/依赖缺失）"
+                    f"{'，且降级链均不可用' if profile.engine.fallback else ''}"
                 )
             return eng
         for name in order:

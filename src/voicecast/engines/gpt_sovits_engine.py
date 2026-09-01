@@ -48,14 +48,25 @@ class GPTSovitsEngine(Engine):
         ref = p.get("ref_audio_path") or p.get("refer_wav_path") or p.get("ref_file")
         if not ref:
             raise VoicecastError(f"GPT-SoVITS 配方缺少参考音频（{profile.id}）")
-        ref = str(Path(ref).resolve() if not str(ref).startswith(("http", "\\")) else ref)
+        ref_path = Path(ref)
+        if not ref_path.is_absolute():
+            from ..core.settings import RECIPES_DIR
+
+            ref_path = RECIPES_DIR / ref_path  # 配方 ref_file 相对 recipes/
+        ref = str(ref_path)
 
         speed = float(p.get("speed", 1.0))
+        prompt_text = str(p.get("prompt_text", "") or "")
+        if not prompt_text:
+            # 参考库约定：ref 同名 .txt 即参考文本
+            txt_path = ref_path.with_suffix(".txt")
+            if txt_path.exists():
+                prompt_text = txt_path.read_text(encoding="utf-8").strip()
         payload = {
             "text": text,
             "text_lang": str(p.get("text_lang", "zh")),
             "ref_audio_path": ref,
-            "prompt_text": str(p.get("prompt_text", "")),
+            "prompt_text": prompt_text,
             "prompt_lang": str(p.get("prompt_lang", "zh")),
             "speed_factor": speed,
             "top_k": int(p.get("top_k", 5)),

@@ -42,14 +42,22 @@ GENDER_WORDS = {"男": ["男", "叔", "爷", "哥", "少年", "总裁"], "女": 
 
 
 def _engine_available(profile: VoiceProfile) -> bool:
-    """候选只保留当前可用引擎的配方——保证"设置几个就出几个"（根源过滤）。"""
+    """候选只保留当前可用引擎的配方——保证"设置几个就出几个"（根源过滤）。
+    宿主不可用但 fallback 降级链可用时，仍视为可用（如 gpt_sovits 未启动 → local）。"""
     from ..engines.registry import EngineRegistry
 
     host = profile.engine.host
     if host == "auto":
         return True  # auto 走成本路由，总会落到某个可用引擎
-    eng = EngineRegistry().get(host)
-    return bool(eng and eng.available())
+    reg = EngineRegistry()
+    eng = reg.get(host)
+    if eng and eng.available():
+        return True
+    for fb in profile.engine.fallback or []:
+        feng = reg.get(fb)
+        if feng and feng.available():
+            return True
+    return False
 
 
 def _searchable(profile: VoiceProfile) -> str:

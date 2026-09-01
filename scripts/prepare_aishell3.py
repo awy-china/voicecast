@@ -181,7 +181,7 @@ def write_recipes(rows: list[list]) -> None:
         profiles.append({
             "id": f"aishell3_{sid}",
             "name": f"真人参考·{gender_cn}·{age_cn}",
-            "engine": {"host": "local"},
+            "engine": {"host": "gpt_sovits", "fallback": ["local"]},
             "params": {"ref_file": f"samples/ref/{meta['first']}.wav"},
             "tags": [gender_cn, age_cn, "真人参考"],
             "note": f"AISHELL-3 {sid}（{meta['gender']}/{meta['age']}，Apache-2.0）",

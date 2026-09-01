@@ -36,10 +36,14 @@ class Provenance(BaseModel):
 
 
 class EnginePref(BaseModel):
-    """引擎偏好：归属硬约束 + 本地优先（独立性铁律）。"""
+    """引擎偏好：归属硬约束 + 本地优先（独立性铁律）。
 
-    host: str = "auto"               # auto / local / edge_tts / minimax / f5tts ...
+    fallback: 宿主引擎不可用时的降级链（如 gpt_sovits 服务未启动 → local）。
+    """
+
+    host: str = "auto"               # auto / local / edge_tts / minimax / gpt_sovits ...
     prefer_local: bool = True        # 本地可用时优先
+    fallback: list[str] | None = None  # 宿主不可用时的降级引擎链
 
 
 class VoiceProfile(BaseModel):

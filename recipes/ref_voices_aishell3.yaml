@@ -1,11 +1,10 @@
-# 参考音频配方（自动生成：prepare_aishell3.py + build_gptsovits_refs.py）
-# 数据源 AISHELL-3（Apache-2.0）。ref 指向 3-10s 拼接参考（GPT-SoVITS 兼容）。
-# wav 本体不入 git（.gitignore）；ref_text 自动读 samples/ref/<同名>.txt。
 profiles:
 - id: aishell3_SSB0011
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0011_ref.wav
   tags:
@@ -16,7 +15,9 @@ profiles:
 - id: aishell3_SSB0016
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0016_ref.wav
   tags:
@@ -27,7 +28,9 @@ profiles:
 - id: aishell3_SSB0073
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0073_ref.wav
   tags:
@@ -38,7 +41,9 @@ profiles:
 - id: aishell3_SSB0139
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0139_ref.wav
   tags:
@@ -49,7 +54,9 @@ profiles:
 - id: aishell3_SSB0241
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0241_ref.wav
   tags:
@@ -60,7 +67,9 @@ profiles:
 - id: aishell3_SSB0261
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0261_ref.wav
   tags:
@@ -71,7 +80,9 @@ profiles:
 - id: aishell3_SSB0267
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0267_ref.wav
   tags:
@@ -82,7 +93,9 @@ profiles:
 - id: aishell3_SSB0273
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0273_ref.wav
   tags:
@@ -93,7 +106,9 @@ profiles:
 - id: aishell3_SSB0288
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0288_SSB02880068.wav
   tags:
@@ -104,7 +119,9 @@ profiles:
 - id: aishell3_SSB0309
   name: 真人参考·女·老年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0309_SSB03090042.wav
   tags:
@@ -115,7 +132,9 @@ profiles:
 - id: aishell3_SSB0316
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0316_ref.wav
   tags:
@@ -126,7 +145,9 @@ profiles:
 - id: aishell3_SSB0341
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0341_ref.wav
   tags:
@@ -137,7 +158,9 @@ profiles:
 - id: aishell3_SSB0354
   name: 真人参考·女·老年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0354_ref.wav
   tags:
@@ -148,7 +171,9 @@ profiles:
 - id: aishell3_SSB0366
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0366_ref.wav
   tags:
@@ -159,7 +184,9 @@ profiles:
 - id: aishell3_SSB0375
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0375_ref.wav
   tags:
@@ -170,7 +197,9 @@ profiles:
 - id: aishell3_SSB0380
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0380_ref.wav
   tags:
@@ -181,7 +210,9 @@ profiles:
 - id: aishell3_SSB0393
   name: 真人参考·女·少年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0393_ref.wav
   tags:
@@ -192,7 +223,9 @@ profiles:
 - id: aishell3_SSB0395
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0395_ref.wav
   tags:
@@ -203,7 +236,9 @@ profiles:
 - id: aishell3_SSB0407
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0407_ref.wav
   tags:
@@ -214,7 +249,9 @@ profiles:
 - id: aishell3_SSB0415
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0415_SSB04150004.wav
   tags:
@@ -225,7 +262,9 @@ profiles:
 - id: aishell3_SSB0434
   name: 真人参考·男·老年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0434_ref.wav
   tags:
@@ -236,7 +275,9 @@ profiles:
 - id: aishell3_SSB0534
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0534_SSB05340006.wav
   tags:
@@ -247,7 +288,9 @@ profiles:
 - id: aishell3_SSB0539
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0539_ref.wav
   tags:
@@ -258,7 +301,9 @@ profiles:
 - id: aishell3_SSB0578
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0578_ref.wav
   tags:
@@ -269,7 +314,9 @@ profiles:
 - id: aishell3_SSB0588
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0588_ref.wav
   tags:
@@ -280,7 +327,9 @@ profiles:
 - id: aishell3_SSB0590
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0590_ref.wav
   tags:
@@ -291,7 +340,9 @@ profiles:
 - id: aishell3_SSB0599
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0599_SSB05990126.wav
   tags:
@@ -302,7 +353,9 @@ profiles:
 - id: aishell3_SSB0606
   name: 真人参考·女·老年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0606_ref.wav
   tags:
@@ -313,7 +366,9 @@ profiles:
 - id: aishell3_SSB0609
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0609_SSB06090003.wav
   tags:
@@ -324,7 +379,9 @@ profiles:
 - id: aishell3_SSB0614
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0614_ref.wav
   tags:
@@ -335,7 +392,9 @@ profiles:
 - id: aishell3_SSB0629
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0629_SSB06290008.wav
   tags:
@@ -346,7 +405,9 @@ profiles:
 - id: aishell3_SSB0631
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0631_ref.wav
   tags:
@@ -357,7 +418,9 @@ profiles:
 - id: aishell3_SSB0632
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0632_ref.wav
   tags:
@@ -368,7 +431,9 @@ profiles:
 - id: aishell3_SSB0666
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0666_SSB06660002.wav
   tags:
@@ -379,7 +444,9 @@ profiles:
 - id: aishell3_SSB0668
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0668_ref.wav
   tags:
@@ -390,7 +457,9 @@ profiles:
 - id: aishell3_SSB0671
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0671_ref.wav
   tags:
@@ -401,7 +470,9 @@ profiles:
 - id: aishell3_SSB0686
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0686_ref.wav
   tags:
@@ -412,7 +483,9 @@ profiles:
 - id: aishell3_SSB0710
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0710_SSB07100003.wav
   tags:
@@ -423,7 +496,9 @@ profiles:
 - id: aishell3_SSB0737
   name: 真人参考·女·老年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0737_ref.wav
   tags:
@@ -434,7 +509,9 @@ profiles:
 - id: aishell3_SSB0762
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0762_ref.wav
   tags:
@@ -445,7 +522,9 @@ profiles:
 - id: aishell3_SSB0784
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0784_ref.wav
   tags:
@@ -456,7 +535,9 @@ profiles:
 - id: aishell3_SSB0966
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB0966_ref.wav
   tags:
@@ -467,7 +548,9 @@ profiles:
 - id: aishell3_SSB1100
   name: 真人参考·男·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1100_ref.wav
   tags:
@@ -478,7 +561,9 @@ profiles:
 - id: aishell3_SSB1125
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1125_ref.wav
   tags:
@@ -489,7 +574,9 @@ profiles:
 - id: aishell3_SSB1136
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1136_ref.wav
   tags:
@@ -500,7 +587,9 @@ profiles:
 - id: aishell3_SSB1161
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1161_SSB11610033.wav
   tags:
@@ -511,7 +600,9 @@ profiles:
 - id: aishell3_SSB1366
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1366_ref.wav
   tags:
@@ -522,7 +613,9 @@ profiles:
 - id: aishell3_SSB1448
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1448_SSB14480070.wav
   tags:
@@ -533,7 +626,9 @@ profiles:
 - id: aishell3_SSB1624
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1624_ref.wav
   tags:
@@ -544,7 +639,9 @@ profiles:
 - id: aishell3_SSB1625
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1625_SSB16250005.wav
   tags:
@@ -555,7 +652,9 @@ profiles:
 - id: aishell3_SSB1684
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1684_SSB16840099.wav
   tags:
@@ -566,7 +665,9 @@ profiles:
 - id: aishell3_SSB1699
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1699_ref.wav
   tags:
@@ -577,7 +678,9 @@ profiles:
 - id: aishell3_SSB1828
   name: 真人参考·女·中年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1828_SSB18280063.wav
   tags:
@@ -588,7 +691,9 @@ profiles:
 - id: aishell3_SSB1837
   name: 真人参考·女·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1837_ref.wav
   tags:
@@ -599,7 +704,9 @@ profiles:
 - id: aishell3_SSB1863
   name: 真人参考·男·青年
   engine:
-    host: local
+    host: gpt_sovits
+    fallback:
+    - local
   params:
     ref_file: samples/ref/aishell3_SSB1863_SSB18630036.wav
   tags:
