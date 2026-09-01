@@ -41,6 +41,17 @@ SYNONYMS: dict[str, list[str]] = {
 GENDER_WORDS = {"男": ["男", "叔", "爷", "哥", "少年", "总裁"], "女": ["女", "婶", "姐", "妹", "少女", "御姐"]}
 
 
+def _engine_available(profile: VoiceProfile) -> bool:
+    """候选只保留当前可用引擎的配方——保证"设置几个就出几个"（根源过滤）。"""
+    from ..engines.registry import EngineRegistry
+
+    host = profile.engine.host
+    if host == "auto":
+        return True  # auto 走成本路由，总会落到某个可用引擎
+    eng = EngineRegistry().get(host)
+    return bool(eng and eng.available())
+
+
 def _searchable(profile: VoiceProfile) -> str:
     return " ".join(
         [profile.id, profile.name, profile.description, *profile.tags]
@@ -75,8 +86,27 @@ def match_candidates(
                     hits.append(canon)
         if gender_hint and gender_hint not in profile.tags and gender_hint not in profile.name:
             continue
+        if not _engine_available(profile):
+            continue  # 引擎不可用（如 minimax 无 key）的配方不进候选，避免占名额
         if score > 0:
             scored.append((profile, score, hits))
 
     scored.sort(key=lambda x: -x[1])
+
+    # 补足：命中不足 top_k 时，从同性别/未命中的配方里补齐，
+    # 只补当前可用引擎的配方——保证"设置几个就出几个"
+    if len(scored) < top_k:
+        seen = {p.id for p, _s, _h in scored}
+        for profile in library.values():
+            if len(scored) >= top_k:
+                break
+            if profile.id in seen:
+                continue
+            if gender_hint and gender_hint not in profile.tags and gender_hint not in profile.name:
+                continue
+            if not _engine_available(profile):
+                continue
+            scored.append((profile, 1, ["补充候选（相关性较低）"]))
+            seen.add(profile.id)
+
     return scored[:top_k]

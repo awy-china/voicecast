@@ -8,9 +8,23 @@ from voicecast.design.recipe_translator import RecipeTranslator
 
 
 def test_rules_find_villain():
+    import os
+
     top = match_candidates("反派中年男声，低沉阴险", top_k=3)
     ids = [p.id for p, _s, _h in top]
-    assert "minimax_villain" in ids or "minimax_male_badao" in ids
+    assert ids  # 有候选
+    if not os.environ.get("MINIMAX_API_KEY"):
+        # 无 key 时 minimax 配方不应占名额（根源过滤：数量对版）
+        assert "minimax_villain" not in ids
+    assert "male_mid_business" in ids or "male_mid_calm" in ids
+
+
+def test_rules_fill_to_top_k():
+    """命中不足 top_k 时自动补足到 top_k（数量对版）。"""
+    top = match_candidates("温柔女声", top_k=4)
+    ids = [p.id for p, _s, _h in top]
+    assert len(ids) == 4
+    assert "female_warm" in ids
 
 
 def test_rules_find_warm_female():
