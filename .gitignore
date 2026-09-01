@@ -35,3 +35,4 @@ models/
 # 系统
 Thumbs.db
 .DS_Store
+.cache_tmp/
