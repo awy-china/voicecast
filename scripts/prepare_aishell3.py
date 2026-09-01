@@ -17,7 +17,7 @@ import sys
 import tarfile
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]          # D:/VoiceCast
+REPO = Path(__file__).resolve().parents[1]          # D:/VoiceCast
 CACHE = REPO / ".cache_tmp" / "cv"
 TGZ = CACHE / "data_aishell3.tgz"
 EXTRACT = CACHE / "extracted"
