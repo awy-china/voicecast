@@ -17,116 +17,63 @@ from ..engines.registry import EngineRegistry
 from ..pipeline.parser import parse_file
 from ..pipeline.scheduler import load_cast, run_batch
 
-MAX_CANDIDATES = 5
-
 # ---------------- Tab1 设计器 ----------------
 
-_last_design: dict = {}  # 最近一次候选结果（滑杆微调用）
+_last_design: dict = {}  # 最近一次生成结果（滑杆微调用）
 
 
-def _refresh_choices(_msg: str):
-    """候选下拉框跟随最近一次生成结果刷新（结果存全局，不依赖 UI 返回值）。"""
-    cands = _last_design.get("candidates", [])
-    return gr.update(choices=[c["profile"].id for c in cands])
-
-
-def _design_go(description: str, top_k: int, progress=gr.Progress()):
-    """流式设计器：候选逐个生成、逐个出现（不依赖进度条，实时可见）。"""
+def _design_go(description: str):
+    """描述 → 直接生成 1 个最匹配的音色（用户指令：去掉多候选）。"""
     global _last_design
-    from ..core.settings import OUTPUTS_DIR
-    from ..design.candidate_gen import PROBE_TEXT, _slug
-    from ..design.recipe_translator import RecipeTranslator
-    from ..engines.registry import EngineRegistry
-
-    base = [None] * MAX_CANDIDATES + [""] * MAX_CANDIDATES
+    from ..design.candidate_gen import generate_voice
 
     if not description.strip():
-        yield [*base, "请输入角色声音描述"]
-        return
-
-    translator = RecipeTranslator()
-    result = translator.translate(description, top_k=int(top_k))
-    registry = EngineRegistry()
-    out_dir = OUTPUTS_DIR / "design" / _slug(description)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    cands = result["candidates"]
-    _last_design = {
-        "source": result["source"], "summary": result["summary"],
-        "candidates": [], "errors": [], "out_dir": str(out_dir),
-    }
-    n = len(cands)
-    yield [*base, f"翻译来源: {result['source']} — {result['summary']}"]
-
-    for i, cand in enumerate(cands, start=1):
-        profile = cand["profile"]
-        yield [*base, f"🎧 正在生成候选 {i}/{n}：{profile.id}（本地引擎首次加载模型约需 1 分钟）…"]
-        try:
-            engine = registry.route(profile)
-            path = out_dir / f"{i:02d}_{profile.id}.wav"
-            engine.synthesize(PROBE_TEXT, profile, path)
-            _last_design["candidates"].append({
-                "index": i, "profile": profile, "audio": str(path),
-                "engine": engine.name, "engine_explain": engine.explain(),
-                "reason": cand["reason"], "params": profile.params,
-            })
-        except Exception as e:  # noqa: BLE001  任何引擎异常都不崩 UI，记录跳过
-            _last_design["errors"].append(f"{profile.id}: {e}")
-
-        outs = [None] * MAX_CANDIDATES + [""] * MAX_CANDIDATES
-        for j, c in enumerate(_last_design["candidates"]):
-            outs[j] = c["audio"]
-            outs[MAX_CANDIDATES + j] = (
-                f"**{c['profile'].id}** · {c['engine_explain']} · {c['reason']}\n\n"
-                f"参数: pitch={c['params'].get('pitch', 0)} speed={c['params'].get('speed', 1.0)}"
-            )
-        msg = f"翻译来源: {result['source']} — {result['summary']}（已生成 {i}/{n}）"
-        for err in _last_design["errors"]:
-            msg += f"\n⚠️ 跳过: {err}"
-        yield [*outs, msg]
+        return None, "请输入角色声音描述"
+    r = generate_voice(description)
+    if not r.get("ok"):
+        return None, f"❌ 生成失败: {r.get('error', '未知错误')}"
+    _last_design = r
+    msg = (
+        f"✅ 生成成功（翻译来源: {r['source']}）\n\n"
+        f"**{r['profile'].id}** · {r['engine_explain']} · {r['reason']}\n\n"
+        f"参数: pitch={r['params'].get('pitch', 0)} speed={r['params'].get('speed', 1.0)}"
+    )
+    return r["audio"], msg
 
 
-def _slider_go(choice: str, age: float, darkness: float, brightness: float, speed: float):
-    cands = _last_design.get("candidates", [])
-    if not cands:
-        return None, "请先生成候选"
-    pick = next((c for c in cands if c["profile"].id == choice), cands[0])
-    profile = apply_sliders(
-        pick["profile"], age_years=age, darkness=darkness,
+def _slider_go(age: float, darkness: float, brightness: float, speed: float):
+    profile = _last_design.get("profile")
+    if profile is None:
+        return None, "请先生成声音"
+    new_profile = apply_sliders(
+        profile, age_years=age, darkness=darkness,
         brightness=brightness, speed=speed,
     )
-    out_dir = Path(_last_design["out_dir"]) / "tuned"
+    out_dir = Path(_last_design["audio"]).parent / "tuned"
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{profile.id}_tuned.wav"
     try:
-        engine = EngineRegistry().route(profile)
-        engine.synthesize("微调后的声音，你听听看。", profile, path)
+        engine = EngineRegistry().route(new_profile)
+        engine.synthesize("微调后的声音，你听听看。", new_profile, path)
         return str(path), (
-            f"基于 {profile.id} 微调 → pitch={profile.params.get('pitch')} "
-            f"speed={profile.params.get('speed')}（{engine.name}）"
+            f"基于 {profile.id} 微调 → pitch={new_profile.params.get('pitch')} "
+            f"speed={new_profile.params.get('speed')}（{engine.name}）"
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return None, f"微调生成失败: {e}"
 
 
 def design_tab() -> gr.Blocks:
     with gr.Blocks() as tab:
-        gr.Markdown("## 🎙️ 音色设计器 —— 描述你想要的声音，出候选试听")
+        gr.Markdown("## 🎙️ 音色设计器 —— 描述你想要的声音，直接生成试听")
+        desc = gr.Textbox(label="角色声音描述", placeholder="如：反派中年男声，低沉阴险", lines=2)
+        gen_btn = gr.Button("🎧 生成声音", variant="primary")
         with gr.Row():
-            desc = gr.Textbox(label="角色声音描述", placeholder="如：反派中年男声，低沉阴险", scale=3)
-            top_k = gr.Slider(1, MAX_CANDIDATES, value=3, step=1, label="候选数量", scale=1)
-        gen_btn = gr.Button("🎧 生成候选", variant="primary")
-        status = gr.Markdown("")
+            audio = gr.Audio(label="生成结果", type="filepath", scale=1)
+            info = gr.Markdown("", scale=2)
 
-        audios: list[gr.Audio] = []
-        reasons: list[gr.Markdown] = []
-        for i in range(MAX_CANDIDATES):
-            with gr.Row():
-                audios.append(gr.Audio(label=f"候选 {i + 1}", type="filepath", scale=1))
-                reasons.append(gr.Markdown(f"候选 {i + 1} 说明", scale=2))
-
-        gr.Markdown("---\n### 🎛️ 滑杆微调（基于选中候选）")
+        gr.Markdown("---\n### 🎛️ 滑杆微调（基于生成结果）")
         with gr.Row():
-            choice = gr.Dropdown(label="选择候选", choices=[], scale=2)
             age = gr.Slider(10, 80, value=25, label="年龄")
             darkness = gr.Slider(-1, 1, value=0, step=0.05, label="低沉↔明亮")
             brightness = gr.Slider(-1, 1, value=0, step=0.05, label="亮度")
@@ -135,10 +82,8 @@ def design_tab() -> gr.Blocks:
         tuned_audio = gr.Audio(label="微调结果", type="filepath")
         tuned_info = gr.Markdown("")
 
-        gen_btn.click(_design_go, [desc, top_k], [*audios, *reasons, status]).then(
-            _refresh_choices, [status], [choice],
-        )
-        tune_btn.click(_slider_go, [choice, age, darkness, brightness, speed],
+        gen_btn.click(_design_go, [desc], [audio, info])
+        tune_btn.click(_slider_go, [age, darkness, brightness, speed],
                        [tuned_audio, tuned_info])
     return tab
 

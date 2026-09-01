@@ -10,7 +10,7 @@ from rich.table import Table
 
 from ..compliance import clone_gate_check, provenance_check
 from ..core.models import Project, VoicecastError
-from ..design.candidate_gen import generate_candidates
+from ..design.candidate_gen import generate_voice
 from ..design.seed import generate_seed_library
 from ..engines.registry import EngineRegistry
 from ..pipeline.parser import parse_file, save_json_script, to_txt
@@ -42,29 +42,23 @@ def engines_cmd() -> None:
 @app.command("design")
 def design_cmd(
     description: str = typer.Argument(..., help="角色声音描述，如：反派中年男声，低沉阴险"),
-    top_k: int = typer.Option(3, help="候选数量"),
     out_dir: Path | None = typer.Option(None, "--out-dir", help="输出目录"),
 ) -> None:
-    """音色设计器：描述 → 候选音频（试听对比）。"""
+    """音色设计器：描述 → 直接生成 1 个最匹配的音色（试听）。"""
     from rich.status import Status
 
-    with console.status("🎧 正在生成候选音频…", spinner="dots") as status:
-        def _progress(_frac: float, msg: str) -> None:
-            status.update(f"🎧 {msg}（本地引擎首次加载模型约需 1 分钟）")
-
-        r = generate_candidates(description, top_k=top_k, out_dir=out_dir,
-                                on_progress=_progress)
+    with console.status("🎧 正在生成声音…", spinner="dots") as status:
+        status.update("🎧 正在生成声音…（本地引擎首次加载模型约需 1 分钟）")
+        r = generate_voice(description, out_dir=out_dir)
+    if not r.get("ok"):
+        console.print(f"[red]❌ 生成失败:[/red] {r.get('error', '未知错误')}")
+        return
     console.print(f"[bold]翻译来源:[/bold] {r['source']} — {r['summary']}")
-    if r["candidates"]:
-        for c in r["candidates"]:
-            console.print(
-                f"  [cyan][{c['index']}][/cyan] [bold]{c['profile'].id}[/bold] "
-                f"({c['engine']}) {c['reason']}\n"
-                f"        [dim]{c['audio']}[/dim]"
-            )
-    for err in r.get("errors", []):
-        console.print(f"[yellow]跳过:[/yellow] {err}")
-    console.print(f"[green]输出目录: {r['out_dir']}[/green]")
+    console.print(
+        f"  [green]✅[/green] [bold]{r['profile'].id}[/bold] "
+        f"({r['engine']}) {r['reason']}\n"
+        f"        [dim]{r['audio']}[/dim]"
+    )
 
 
 @app.command("run")
