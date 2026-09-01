@@ -56,6 +56,13 @@ def generate_voice(
     try:
         engine = registry.route(profile)
         engine.synthesize(probe_text, profile, path)
+        # 后处理链（去 AI 味），档位由配方控制；失败容忍（保留原始输出）
+        try:
+            from ..postprocess.chain import postprocess_audio
+
+            postprocess_audio(path, level=str(profile.params.get("postprocess", "natural")))
+        except Exception:  # noqa: BLE001
+            pass
     except VoicecastError as e:
         return {"ok": False, "profile": profile, "error": str(e),
                 "source": result["source"], "summary": result["summary"]}

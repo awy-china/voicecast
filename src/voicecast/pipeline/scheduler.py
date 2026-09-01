@@ -7,12 +7,16 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 
 from ..core.io import load_recipe_library, load_yaml
 from ..core.models import Cast, Project, Role, Script, VoiceProfile, VoicecastError
 from ..engines.registry import Engine, EngineRegistry
+from ..postprocess.chain import postprocess_audio
+
+logger = logging.getLogger("voicecast.scheduler")
 from .archiver import line_filename, write_manifest
 from .router import estimate_cost, route_engine
 
@@ -125,7 +129,14 @@ def run_batch(
                 last_err = str(e)
                 if attempt < RETRIES:
                     time.sleep(RETRY_DELAY * (attempt + 1))
-
+        if not last_err:
+            # 后处理链（去 AI 味）：档位由配方 params.postprocess 控制，
+            # 失败不致命——保留引擎原始输出继续
+            try:
+                postprocess_audio(out_path, level=str(profile.params.get("postprocess", "natural")))
+            except Exception as e:  # noqa: BLE001
+                last_err = ""
+                logger.warning("后处理失败，使用原始输出: %s", e)
         if last_err:
             error_count += 1
             _emit({
