@@ -32,32 +32,59 @@ def _refresh_choices(_msg: str):
 
 
 def _design_go(description: str, top_k: int, progress=gr.Progress()):
+    """流式设计器：候选逐个生成、逐个出现（不依赖进度条，实时可见）。"""
     global _last_design
+    from ..core.models import VoicecastError
+    from ..core.settings import OUTPUTS_DIR
+    from ..design.candidate_gen import PROBE_TEXT, _slug
+    from ..design.recipe_translator import RecipeTranslator
+    from ..engines.registry import EngineRegistry
+
+    base = [None] * MAX_CANDIDATES + [""] * MAX_CANDIDATES
+
     if not description.strip():
-        return [None] * MAX_CANDIDATES * 2 + ["请输入角色声音描述"]
-    progress(0.05, desc="翻译配方…")
+        yield [*base, "请输入角色声音描述"]
+        return
 
-    def _cb(frac: float, msg: str) -> None:
-        progress(frac, desc=f"🎧 {msg}（本地引擎首次加载模型约需 1 分钟）")
+    translator = RecipeTranslator()
+    result = translator.translate(description, top_k=int(top_k))
+    registry = EngineRegistry()
+    out_dir = OUTPUTS_DIR / "design" / _slug(description)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cands = result["candidates"]
+    _last_design = {
+        "source": result["source"], "summary": result["summary"],
+        "candidates": [], "errors": [], "out_dir": str(out_dir),
+    }
+    n = len(cands)
+    yield [*base, f"翻译来源: {result['source']} — {result['summary']}"]
 
-    r = generate_candidates(description, top_k=int(top_k), on_progress=_cb)
-    _last_design = r
-    progress(1.0, desc="完成")
-    outs: list = []
-    for i in range(MAX_CANDIDATES):
-        if i < len(r["candidates"]):
-            c = r["candidates"][i]
-            outs.append(c["audio"])
-            outs.append(
+    for i, cand in enumerate(cands, start=1):
+        profile = cand["profile"]
+        yield [*base, f"🎧 正在生成候选 {i}/{n}：{profile.id}（本地引擎首次加载模型约需 1 分钟）…"]
+        try:
+            engine = registry.route(profile)
+            path = out_dir / f"{i:02d}_{profile.id}.wav"
+            engine.synthesize(PROBE_TEXT, profile, path)
+            _last_design["candidates"].append({
+                "index": i, "profile": profile, "audio": str(path),
+                "engine": engine.name, "engine_explain": engine.explain(),
+                "reason": cand["reason"], "params": profile.params,
+            })
+        except VoicecastError as e:
+            _last_design["errors"].append(f"{profile.id}: {e}")
+
+        outs = [None] * MAX_CANDIDATES + [""] * MAX_CANDIDATES
+        for j, c in enumerate(_last_design["candidates"]):
+            outs[j] = c["audio"]
+            outs[MAX_CANDIDATES + j] = (
                 f"**{c['profile'].id}** · {c['engine_explain']} · {c['reason']}\n\n"
                 f"参数: pitch={c['params'].get('pitch', 0)} speed={c['params'].get('speed', 1.0)}"
             )
-        else:
-            outs += [None, ""]
-    msg = f"翻译来源: {r['source']} — {r['summary']}"
-    for e in r.get("errors", []):
-        msg += f"\n⚠️ 跳过: {e}"
-    return [*outs, msg]
+        msg = f"翻译来源: {result['source']} — {result['summary']}（已生成 {i}/{n}）"
+        for err in _last_design["errors"]:
+            msg += f"\n⚠️ 跳过: {err}"
+        yield [*outs, msg]
 
 
 def _slider_go(choice: str, age: float, darkness: float, brightness: float, speed: float):
@@ -173,43 +200,61 @@ def cast_tab() -> gr.Blocks:
 
 # ---------------- Tab3 批量配音 ----------------
 
-def _batch_run(script_path: str, cast_path: str, out_dir: str, budget: float, dry: bool,
-               progress=gr.Progress()):
+def _batch_run_stream(script_path: str, cast_path: str, out_dir: str, budget: float,
+                      dry: bool, progress=gr.Progress()):
+    """流式批量配音：每句完成即 yield 日志，前端实时滚动（不依赖进度条）。"""
+    import threading
+    import time
+
     from ..compliance.sensitive_words import check_text
 
-    progress(0.05, desc="解析剧本与角色表…")
-    try:
-        s = parse_file(script_path)
-        c = load_cast(cast_path)
-        project = Project(name=s.title, script_path=script_path, cast_path=cast_path,
-                          output_dir=Path(out_dir), budget_per_episode=budget)
-        total = max(len(s.lines), 1)
-        done = 0
+    yield "", "⏳ 解析剧本与角色表…", []
+    s = parse_file(script_path)
+    c = load_cast(cast_path)
+    project = Project(name=s.title, script_path=script_path, cast_path=cast_path,
+                      output_dir=Path(out_dir), budget_per_episode=budget)
+    total = max(len(s.lines), 1)
+    log: list[str] = []
+    box: dict = {}
 
+    def worker() -> None:
         def on_line(rec: dict) -> None:
-            nonlocal done
-            done += 1
             st = rec["status"]
             icon = {"ok": "✅", "error": "❌", "blocked": "🚫", "budget_skipped": "⏭"}.get(st, "•")
             err = f" {rec.get('error', '')}" if rec.get("error") else ""
-            progress(done / total, desc=f"[{done}/{total}] {icon} {rec['role']} · {rec.get('engine', '—')}{err}")
+            log.append(
+                f"[{len(log) + 1:>3}/{total}] {icon} {rec['role']} · "
+                f"{rec.get('engine', '—')}{err}"
+            )
 
-        r = run_batch(project, s, c, dry_run=dry, compliance_check=check_text, on_line=on_line)
-        progress(1.0, desc="✅ 完成")
-        rows = [
-            [rec.get("line_no"), rec.get("episode"), rec.get("role"), rec.get("status"),
-             rec.get("engine", ""), rec.get("file", ""), rec.get("error", "")]
-            for rec in r["records"]
-        ]
-        summary = (
-            f"成功 {r['ok']} / 失败 {r['error']} / 拦截 {r.get('blocked', 0)} / "
-            f"预算跳过 {r['budget_skipped']} / 总成本 {r['total_cost']} 元\n"
-            f"manifest: {r['manifest']}"
-        )
-        return rows, summary
-    except Exception as e:
-        progress(1.0, desc="失败")
-        return [], f"运行失败: {e}"
+        try:
+            box["result"] = run_batch(project, s, c, dry_run=dry,
+                                      compliance_check=check_text, on_line=on_line)
+        except Exception as e:  # noqa: BLE001
+            box["error"] = str(e)
+
+    t = threading.Thread(target=worker, daemon=True)
+    t.start()
+    while t.is_alive():
+        yield "\n".join(log[-20:]), "⏳ 配音运行中…", []
+        time.sleep(0.25)
+    t.join()
+
+    if "error" in box:
+        yield "\n".join(log[-20:]), f"❌ 运行失败: {box['error']}", []
+        return
+    r = box["result"]
+    summary = (
+        f"✅ 成功 {r['ok']} / 失败 {r['error']} / 拦截 {r.get('blocked', 0)} / "
+        f"预算跳过 {r['budget_skipped']} / 总成本 {r['total_cost']} 元\n"
+        f"📄 manifest: {r['manifest']}"
+    )
+    rows = [
+        [rec.get("line_no"), rec.get("episode"), rec.get("role"), rec.get("status"),
+         rec.get("engine", ""), rec.get("file", ""), rec.get("error", "")]
+        for rec in r["records"]
+    ]
+    yield "\n".join(log[-30:]), summary, rows
 
 
 def batch_tab() -> gr.Blocks:
@@ -223,13 +268,16 @@ def batch_tab() -> gr.Blocks:
             budget = gr.Number(label="每集预算(元)，0=不限", value=0)
             dry = gr.Checkbox(label="仅规划(dry-run)", value=False)
         run_btn = gr.Button("🚀 开始配音", variant="primary")
+        log_box = gr.Textbox(label="📊 实时状态（每句完成后滚动更新）", lines=18,
+                             interactive=False, placeholder="点击开始配音后，这里会逐句显示进度…")
         summary = gr.Markdown("")
         result = gr.Dataframe(
             headers=["句号", "集", "角色", "状态", "引擎", "文件", "错误"],
             interactive=False,
         )
-        run_btn.click(_batch_run, [script_path, cast_path, out_dir, budget, dry],
-                      [result, summary])
+        run_btn.click(_batch_run_stream,
+                      [script_path, cast_path, out_dir, budget, dry],
+                      [log_box, summary, result])
     return tab
 
 
