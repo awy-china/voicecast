@@ -12,7 +12,6 @@ import gradio as gr
 
 from ..core.io import load_recipe_library, save_yaml
 from ..core.models import Cast, Project
-from ..design.candidate_gen import generate_candidates
 from ..design.sliders import apply_sliders
 from ..engines.registry import EngineRegistry
 from ..pipeline.parser import parse_file
