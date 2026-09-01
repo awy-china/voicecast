@@ -46,7 +46,14 @@ def design_cmd(
     out_dir: Path | None = typer.Option(None, "--out-dir", help="输出目录"),
 ) -> None:
     """音色设计器：描述 → 候选音频（试听对比）。"""
-    r = generate_candidates(description, top_k=top_k, out_dir=out_dir)
+    from rich.status import Status
+
+    with console.status("🎧 正在生成候选音频…", spinner="dots") as status:
+        def _progress(_frac: float, msg: str) -> None:
+            status.update(f"🎧 {msg}（本地引擎首次加载模型约需 1 分钟）")
+
+        r = generate_candidates(description, top_k=top_k, out_dir=out_dir,
+                                on_progress=_progress)
     console.print(f"[bold]翻译来源:[/bold] {r['source']} — {r['summary']}")
     if r["candidates"]:
         for c in r["candidates"]:
@@ -68,7 +75,10 @@ def run_cmd(
     budget: float = typer.Option(0.0, "--budget", help="每集预算上限（元），0=不限"),
     dry_run: bool = typer.Option(False, "--dry-run", help="只规划不生成"),
 ) -> None:
-    """批量配音：剧本 → 分句音频 + manifest（成本/溯源）。"""
+    """批量配音：剧本 → 分句音频 + manifest（成本/溯源）。实时进度面板。"""
+    from rich.live import Live
+    from rich.panel import Panel
+
     from ..compliance.sensitive_words import check_text
 
     s = parse_file(script)
@@ -77,7 +87,38 @@ def run_cmd(
         name=s.title, script_path=str(script), cast_path=str(cast),
         output_dir=out_dir, budget_per_episode=budget,
     )
-    result = run_batch(project, s, c, dry_run=dry_run, compliance_check=check_text)
+    total = len(s.lines)
+    if total == 0:
+        console.print("[yellow]剧本为空[/yellow]")
+        raise typer.Exit(1)
+
+    if dry_run:
+        result = run_batch(project, s, c, dry_run=True, compliance_check=check_text)
+    else:
+        stats = {"ok": 0, "error": 0, "blocked": 0, "budget_skipped": 0}
+        icons = {"ok": "✅ 成功", "error": "❌ 失败", "blocked": "🚫 违规拦截",
+                 "budget_skipped": "⏭ 超预算"}
+
+        def _panel(cur_line: dict, done: int) -> Panel:
+            icon = icons.get(cur_line["status"], cur_line["status"])
+            err = f" [red]· {cur_line.get('error', '')}[/red]" if cur_line.get("error") else ""
+            body = (
+                f"[bold cyan][{done}/{total}][/bold cyan] "
+                f"{cur_line['role']} · {cur_line.get('engine', '—')} · {icon}{err}\n"
+                f"[dim]成功 {stats['ok']} · 失败 {stats['error']} · "
+                f"拦截 {stats['blocked']} · 超预算 {stats['budget_skipped']}[/dim]"
+            )
+            return Panel(body, title=f"🎬 配音进度：{project.name}", border_style="cyan")
+
+        with Live(console=console, refresh_per_second=6) as live:
+            def on_line(rec: dict) -> None:
+                stats[rec["status"]] = stats.get(rec["status"], 0) + 1
+                live.update(_panel(rec, sum(stats.values())))
+
+            result = run_batch(project, s, c, compliance_check=check_text, on_line=on_line)
+        console.print(f"[green]✅ 完成：成功 {result['ok']} / 失败 {result['error']} / "
+                      f"拦截 {result.get('blocked', 0)} / 超预算 {result['budget_skipped']} / "
+                      f"总成本 {result['total_cost']} 元[/green]")
 
     table = Table(title=f"配音结果：{project.name}")
     table.add_column("状态")

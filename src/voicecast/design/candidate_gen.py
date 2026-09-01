@@ -27,8 +27,10 @@ def generate_candidates(
     out_dir: Path | None = None,
     probe_text: str = PROBE_TEXT,
     top_k: int = 3,
+    on_progress=None,
 ) -> dict:
-    """返回 {description, source, summary, candidates: [...]}。"""
+    """返回 {description, source, summary, candidates: [...]}。
+    on_progress: Callable[[float, str], None] | None —— 进度回调 (0~1, 消息)。"""
     translator = RecipeTranslator()
     result = translator.translate(description, top_k=top_k)
     registry = EngineRegistry()
@@ -37,8 +39,11 @@ def generate_candidates(
 
     candidates = []
     errors = []
+    n = len(result["candidates"])
     for i, cand in enumerate(result["candidates"], start=1):
         profile: VoiceProfile = cand["profile"]
+        if on_progress:
+            on_progress((i - 0.5) / max(n, 1), f"正在生成候选 {i}/{n}：{profile.id}…")
         try:
             engine = registry.route(profile)
         except VoicecastError as e:

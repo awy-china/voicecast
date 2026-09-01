@@ -25,12 +25,24 @@ MAX_CANDIDATES = 5
 _last_design: dict = {}  # 最近一次候选结果（滑杆微调用）
 
 
-def _design_go(description: str, top_k: int):
+def _refresh_choices(_msg: str):
+    """候选下拉框跟随最近一次生成结果刷新（结果存全局，不依赖 UI 返回值）。"""
+    cands = _last_design.get("candidates", [])
+    return gr.update(choices=[c["profile"].id for c in cands])
+
+
+def _design_go(description: str, top_k: int, progress=gr.Progress()):
     global _last_design
     if not description.strip():
         return [None] * MAX_CANDIDATES * 2 + ["请输入角色声音描述"]
-    r = generate_candidates(description, top_k=int(top_k))
+    progress(0.05, desc="翻译配方…")
+
+    def _cb(frac: float, msg: str) -> None:
+        progress(frac, desc=f"🎧 {msg}（本地引擎首次加载模型约需 1 分钟）")
+
+    r = generate_candidates(description, top_k=int(top_k), on_progress=_cb)
     _last_design = r
+    progress(1.0, desc="完成")
     outs: list = []
     for i in range(MAX_CANDIDATES):
         if i < len(r["candidates"]):
@@ -99,8 +111,7 @@ def design_tab() -> gr.Blocks:
         tuned_info = gr.Markdown("")
 
         gen_btn.click(_design_go, [desc, top_k], [*audios, *reasons, status]).then(
-            lambda r: gr.update(choices=[c["profile"].id for c in r.get("candidates", [])]),
-            [status], [choice],
+            _refresh_choices, [status], [choice],
         )
         tune_btn.click(_slider_go, [choice, age, darkness, brightness, speed],
                        [tuned_audio, tuned_info])
@@ -162,15 +173,29 @@ def cast_tab() -> gr.Blocks:
 
 # ---------------- Tab3 批量配音 ----------------
 
-def _batch_run(script_path: str, cast_path: str, out_dir: str, budget: float, dry: bool):
+def _batch_run(script_path: str, cast_path: str, out_dir: str, budget: float, dry: bool,
+               progress=gr.Progress()):
     from ..compliance.sensitive_words import check_text
 
+    progress(0.05, desc="解析剧本与角色表…")
     try:
         s = parse_file(script_path)
         c = load_cast(cast_path)
         project = Project(name=s.title, script_path=script_path, cast_path=cast_path,
                           output_dir=Path(out_dir), budget_per_episode=budget)
-        r = run_batch(project, s, c, dry_run=dry, compliance_check=check_text)
+        total = max(len(s.lines), 1)
+        done = 0
+
+        def on_line(rec: dict) -> None:
+            nonlocal done
+            done += 1
+            st = rec["status"]
+            icon = {"ok": "✅", "error": "❌", "blocked": "🚫", "budget_skipped": "⏭"}.get(st, "•")
+            err = f" {rec.get('error', '')}" if rec.get("error") else ""
+            progress(done / total, desc=f"[{done}/{total}] {icon} {rec['role']} · {rec.get('engine', '—')}{err}")
+
+        r = run_batch(project, s, c, dry_run=dry, compliance_check=check_text, on_line=on_line)
+        progress(1.0, desc="完成")
         rows = [
             [rec.get("line_no"), rec.get("episode"), rec.get("role"), rec.get("status"),
              rec.get("engine", ""), rec.get("file", ""), rec.get("error", "")]
@@ -183,6 +208,7 @@ def _batch_run(script_path: str, cast_path: str, out_dir: str, budget: float, dr
         )
         return rows, summary
     except Exception as e:
+        progress(1.0, desc="失败")
         return [], f"运行失败: {e}"
 
 

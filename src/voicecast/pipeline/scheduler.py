@@ -51,8 +51,10 @@ def run_batch(
     dry_run: bool = False,
     registry: EngineRegistry | None = None,
     compliance_check=None,
+    on_line=None,
 ) -> dict:
-    """compliance_check: Callable[[str], list[str]] | None —— 返回违规词列表则拦截。"""
+    """compliance_check: Callable[[str], list[str]] | None —— 返回违规词列表则拦截。
+    on_line: Callable[[dict], None] | None —— 每句处理完回调该句记录（进度可见性）。"""
     registry = registry or EngineRegistry()
     out_root = project.output_dir
     out_root.mkdir(parents=True, exist_ok=True)
@@ -61,12 +63,17 @@ def run_batch(
     ep_cost: dict[int, float] = {}
     ok_count = error_count = planned_count = budget_skipped = blocked_count = 0
 
+    def _emit(rec: dict) -> None:
+        records.append(rec)
+        if on_line:
+            on_line(rec)
+
     for ln in script.lines:
         if compliance_check:
             hits = compliance_check(ln.text)
             if hits:
                 blocked_count += 1
-                records.append({
+                _emit({
                     "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                     "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                     "status": "blocked", "error": f"违规词: {'、'.join(hits)}",
@@ -76,7 +83,7 @@ def run_batch(
         over_budget = budget > 0 and ep_cost.get(ln.episode, 0) >= budget
         if over_budget:
             budget_skipped += 1
-            records.append({
+            _emit({
                 "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                 "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                 "status": "budget_skipped", "error": f"第{ln.episode}集预算已超(上限{budget}元)",
@@ -88,7 +95,7 @@ def run_batch(
             engine = route_engine(profile, project, registry)
         except VoicecastError as e:
             error_count += 1
-            records.append({
+            _emit({
                 "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                 "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                 "status": "error", "error": str(e),
@@ -101,7 +108,7 @@ def run_batch(
 
         if dry_run:
             planned_count += 1
-            records.append({
+            _emit({
                 "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                 "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                 "status": "planned", "engine": engine.name, "file": rel_path,
@@ -121,7 +128,7 @@ def run_batch(
 
         if last_err:
             error_count += 1
-            records.append({
+            _emit({
                 "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                 "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                 "status": "error", "engine": engine.name, "error": last_err,
@@ -130,7 +137,7 @@ def run_batch(
             ok_count += 1
             cost = estimate_cost(ln.text, engine)
             ep_cost[ln.episode] = ep_cost.get(ln.episode, 0) + cost
-            records.append({
+            _emit({
                 "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
                 "role": ln.role, "text": ln.text, "emotion": ln.emotion,
                 "status": "ok", "engine": engine.name, "file": rel_path,

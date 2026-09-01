@@ -153,3 +153,25 @@ def test_scheduler_dry_run(tmp_path):
     result = run_batch(project, script, cast, dry_run=True, registry=reg)
     assert result["planned"] == 3
     assert all(r["status"] == "planned" for r in result["records"])
+
+
+def test_scheduler_on_line_callback(tmp_path):
+    """逐句回调：每句处理完都被通知（进度可见性）。"""
+    cast_path = tmp_path / "cast.yaml"
+    cast_path.write_text(_demo_cast(), encoding="utf-8")
+    cast = load_cast(cast_path)
+    script = parse_txt(DEMO_TXT)
+    project = Project(name="demo", script_path="s.txt", cast_path=str(cast_path),
+                      output_dir=tmp_path / "out")
+    reg = EngineRegistry([FakeEngine("edge_tts")])
+    events: list[dict] = []
+
+    def on_line(rec: dict) -> None:
+        events.append(rec)
+
+    result = run_batch(project, script, cast, registry=reg, on_line=on_line)
+    assert len(events) == len(script.lines) == 3
+    assert [e["status"] for e in events] == ["ok", "ok", "ok"]
+    assert events[0]["role"] == "林锋"
+    # 回调顺序与结果记录一致
+    assert [e["line_no"] for e in events] == [r["line_no"] for r in result["records"]]
