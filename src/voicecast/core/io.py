@@ -37,18 +37,24 @@ def save_json(data: Any, path: Path | str) -> None:
 
 
 def load_recipe_library() -> dict[str, VoiceProfile]:
-    """加载通用配方库（recipes/voice_profiles.yaml），返回 id -> VoiceProfile。"""
-    candidates = [
+    """加载配方库：voice_profiles.yaml + 所有 ref_voices_*.yaml（参考音频配方），
+    返回 id -> VoiceProfile。后加载的文件可覆盖/补充。"""
+    files = [
         RECIPES_DIR / "voice_profiles.yaml",
         RECIPES_DIR / "voice_profiles.json",
     ]
-    for c in candidates:
-        if c.exists():
-            raw = load_yaml(c) if c.suffix == ".yaml" else load_json(c)
-            items = raw.get("profiles", raw) if isinstance(raw, dict) else raw
-            profiles: dict[str, VoiceProfile] = {}
-            for item in items:
-                p = VoiceProfile.model_validate(item)
-                profiles[p.id] = p
-            return profiles
-    raise VoicecastError(f"配方库不存在: {RECIPES_DIR / 'voice_profiles.yaml'}")
+    files += sorted(RECIPES_DIR.glob("ref_voices_*.yaml"))
+    profiles: dict[str, VoiceProfile] = {}
+    found = False
+    for c in files:
+        if not c.exists():
+            continue
+        found = True
+        raw = load_yaml(c) if c.suffix == ".yaml" else load_json(c)
+        items = raw.get("profiles", raw) if isinstance(raw, dict) else raw
+        for item in items:
+            p = VoiceProfile.model_validate(item)
+            profiles[p.id] = p
+    if not found:
+        raise VoicecastError(f"配方库不存在: {RECIPES_DIR / 'voice_profiles.yaml'}")
+    return profiles

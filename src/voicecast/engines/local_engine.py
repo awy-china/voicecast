@@ -104,7 +104,14 @@ class LocalEngine(Engine):
         ref_path = self._resolve_ref(profile)
         if ref_path is None:
             raise VoicecastError(f"本地引擎需要参考音频 ref_file（配方 {profile.id}）")
-        ref_text = str(profile.params.get("ref_text", "") or SEED_REF_TEXT)
+        # ref_text 优先级：配方参数 > 参考音频同名 .txt（参考库约定）> 种子默认文本
+        ref_text = str(profile.params.get("ref_text", "") or "")
+        if not ref_text:
+            txt_path = ref_path.with_suffix(".txt")
+            if txt_path.exists():
+                ref_text = txt_path.read_text(encoding="utf-8").strip()
+        if not ref_text:
+            ref_text = SEED_REF_TEXT
         speed = float(profile.params.get("speed", 1.0))
         pitch_cents = float(profile.params.get("pitch", 0))
 

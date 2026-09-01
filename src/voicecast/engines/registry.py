@@ -5,10 +5,12 @@ from __future__ import annotations
 from ..core.models import VoiceProfile, VoicecastError
 from .base import Engine
 from .edge_tts_engine import EdgeTTSEngine
+from .gpt_sovits_engine import GPTSovitsEngine
 from .local_engine import LocalEngine
 from .minimax_engine import MiniMaxEngine
 
-DEFAULT_ORDER = ["local", "edge_tts", "minimax"]
+# 成本序：本地免费优先；GPT-SoVITS 是"质量档"（服务启动才参与路由）
+DEFAULT_ORDER = ["local", "gpt_sovits", "edge_tts", "minimax"]
 
 
 class EngineRegistry:
@@ -16,7 +18,8 @@ class EngineRegistry:
         self._engines: dict[str, Engine] = {
             e.name: e
             for e in (engines if engines is not None
-                      else [LocalEngine(), EdgeTTSEngine(), MiniMaxEngine()])
+                      else [LocalEngine(), GPTSovitsEngine(),
+                            EdgeTTSEngine(), MiniMaxEngine()])
         }
 
     def all(self) -> list[Engine]:

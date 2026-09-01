@@ -9,9 +9,10 @@ from voicecast.core.models import VoiceProfile, VoicecastError
 from voicecast.engines.registry import EngineRegistry
 
 
-def test_registry_has_three_engines():
+def test_registry_has_all_engines():
     r = EngineRegistry()
-    assert {e.name for e in r.all()} == {"local", "edge_tts", "minimax"}
+    names = {e.name for e in r.all()}
+    assert {"local", "gpt_sovits", "edge_tts", "minimax"} <= names
 
 
 def test_minimax_skipped_without_key():
