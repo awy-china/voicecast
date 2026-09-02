@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceCast 声演工作室</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+</head>
+<body>
+
+<!-- 开屏揭幕 -->
+<div id="boot">
+  <div class="boot-inner">
+    <div class="boot-mark">
+      <div class="boot-eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="boot-title">VOICECAST</div>
+    <div class="boot-sub">声演工作室 · SOUND LAB</div>
+  </div>
+</div>
+
+<!-- 顶部等化器装饰条 -->
+<div class="eq-bar" id="eqBar" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <aside class="side">
+    <div class="side-logo">
+      <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
+        <path d="M4 20v-8M10 24v-16M16 28V4M22 22v-12M28 18v-4"
+              stroke="#F5A623" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span>VoiceCast</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="design">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8v8M19 8v8M8 5v14M16 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>音色设计</span>
+      </button>
+      <button class="nav-item" data-view="blend">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>音色混合</span>
+      </button>
+      <button class="nav-item" data-view="batch">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>批量配音</span>
+      </button>
+    </nav>
+    <div class="side-status">
+      <div id="engineDots" class="engine-dots"></div>
+      <div class="side-status-text">引擎状态</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- 视图 1：音色设计 -->
+    <section class="view active" id="view-design">
+      <div class="view-head">
+        <h1>音色设计器</h1>
+        <p class="view-sub">描述你想要的角色声音——直接生成，波形即答案。</p>
+      </div>
+      <div class="card design-card">
+        <div class="input-row">
+          <input id="designDesc" class="big-input" type="text"
+                 placeholder="如：老年女声 / 反派中年男声，低沉阴险"
+                 autocomplete="off" spellcheck="false">
+          <button id="designBtn" class="btn-primary">生成音色</button>
+        </div>
+        <div class="design-hint" id="designHint"></div>
+      </div>
+      <div class="card result-card hidden" id="designResult">
+        <div class="result-head">
+          <div class="result-id" id="designProfileId">—</div>
+          <div class="result-meta" id="designMeta"></div>
+        </div>
+        <div class="wave-wrap">
+          <canvas id="designWave" height="120"></canvas>
+          <button class="play-btn" id="designPlay" title="试听">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <audio id="designAudio" style="display:none"></audio>
+        <div class="result-params" id="designParams"></div>
+      </div>
+    </section>
+
+    <!-- 视图 2：音色混合 -->
+    <section class="view" id="view-blend">
+      <div class="view-head">
+        <h1>音色混合器</h1>
+        <p class="view-sub">主参考 × 辅助参考——GPT-SoVITS 多说话人融合，造出两个源都没有的独特声音。</p>
+      </div>
+      <div class="card blend-card">
+        <div class="blend-row">
+          <div class="blend-field">
+            <label>主参考（韵律骨架）</label>
+            <select id="blendMain" class="select"></select>
+          </div>
+          <div class="blend-plus">×</div>
+          <div class="blend-field">
+            <label>辅助参考（渗入音色）</label>
+            <select id="blendAux" class="select" multiple size="4"></select>
+          </div>
+          <button id="blendBtn" class="btn-primary">融合生成</button>
+        </div>
+        <div class="design-hint" id="blendHint"></div>
+      </div>
+      <div class="card result-card hidden" id="blendResult">
+        <div class="result-head">
+          <div class="result-id" id="blendProfileId">—</div>
+          <div class="result-meta" id="blendMeta"></div>
+        </div>
+        <div class="wave-wrap">
+          <canvas id="blendWave" height="120"></canvas>
+          <button class="play-btn" id="blendPlay" title="试听">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <audio id="blendAudio" style="display:none"></audio>
+      </div>
+    </section>
+
+    <!-- 视图 3：批量配音 -->
+    <section class="view" id="view-batch">
+      <div class="view-head">
+        <h1>批量配音</h1>
+        <p class="view-sub">剧本 → 分角色 → 逐句生成，实时进度滚动。</p>
+      </div>
+      <div class="card batch-card">
+        <div class="batch-grid">
+          <div class="batch-field">
+            <label>剧本文件</label>
+            <input id="batchScript" class="input" value="examples/script_demo.txt" spellcheck="false">
+          </div>
+          <div class="batch-field">
+            <label>角色表</label>
+            <input id="batchCast" class="input" value="examples/cast_demo.yaml" spellcheck="false">
+          </div>
+          <div class="batch-field">
+            <label>输出目录</label>
+            <input id="batchOut" class="input" value="outputs/web" spellcheck="false">
+          </div>
+        </div>
+        <div class="batch-actions">
+          <label class="check"><input type="checkbox" id="batchDry"> 仅规划（不生成）</label>
+          <button id="batchBtn" class="btn-primary">开始配音</button>
+        </div>
+      </div>
+      <div class="card log-card hidden" id="batchLogCard">
+        <div class="log-head">实时进度 <span class="log-count" id="logCount">0/0</span></div>
+        <div class="log-list" id="logList"></div>
+      </div>
+      <div class="card result-card hidden" id="batchSummary">
+        <div class="result-head"><div class="result-id">完成</div>
+          <div class="result-meta" id="batchSummaryText"></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
