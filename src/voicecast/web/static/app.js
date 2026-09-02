@@ -123,7 +123,6 @@ function showResult(prefix, payload) {
     `${payload.name || ""} · ${payload.engine || ""}${payload.reason ? " · " + payload.reason : ""}`;
   const canvas = $(prefix + "Wave");
   canvas.__pts = payload.waveform || [];
-  drawWave(canvas, canvas.__pts);
   if (payload.audio_url) {
     if (prefix === "design") designAudioUrl = payload.audio_url;
     else blendAudioUrl = payload.audio_url;
@@ -135,6 +134,8 @@ function showResult(prefix, payload) {
       (p.ref_file ? `  ·  参考: ${p.ref_file.split("/").pop()}` : "");
   }
   $(prefix + "Result").classList.remove("hidden");
+  // 先显示容器等布局稳定再绘制（display:none 内 canvas 宽度为 0）
+  setTimeout(() => drawWave(canvas, canvas.__pts), 80);
 }
 
 /* ---------- 设计器 ---------- */
