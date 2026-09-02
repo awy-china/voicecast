@@ -109,6 +109,9 @@ def match_candidates(
             continue
         if not _engine_available(profile):
             continue  # 引擎不可用（如 minimax 无 key）的配方不进候选，避免占名额
+        # 真人参考加权：真人感 > 合成预设（用户核心诉求——去金属感/电子味）
+        if "真人参考" in profile.tags:
+            score += 1
         if score > 0:
             scored.append((profile, score, hits))
 

@@ -2,7 +2,7 @@
 
 import os
 
-from voicecast.design.recipe_rules import match_candidates
+from voicecast.design.recipe_rules import _engine_available, match_candidates
 from voicecast.design.sliders import apply_sliders
 from voicecast.design.recipe_translator import RecipeTranslator
 
@@ -61,8 +61,13 @@ def test_rules_find_warm_female():
 
 def test_rules_find_elderly():
     top = match_candidates("六十岁的沧桑老人", top_k=3)
-    ids = [p.id for p, _s, _h in top]
-    assert "male_elderly" in ids
+    # 真人参考加权（去金属感）：无性别描述时真人配方优先
+    assert any("真人参考" in p.tags for p, _s, _h in top)
+    # 老年特征仍被匹配
+    assert any("老年" in p.tags for p, _s, _h in top)
+    # 所有候选引擎可用
+    for p, _s, _h in top:
+        assert _engine_available(p)
 
 
 def test_rules_gender_filter():
