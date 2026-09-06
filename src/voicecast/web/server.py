@@ -225,6 +225,31 @@ def cast_save(body: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/rerun")
+def rerun_api(body: dict):
+    """单句修复：只重跑指定行，覆盖原文件。"""
+    script = body.get("script") or "examples/script_demo.txt"
+    cast = body.get("cast") or "examples/cast_demo.yaml"
+    out_dir = body.get("out_dir") or "outputs/web"
+    line_no = int(body.get("line_no") or 0)
+    new_text = (body.get("new_text") or "").strip() or None
+    if line_no <= 0:
+        raise HTTPException(status_code=400, detail="需要 line_no")
+    try:
+        from ..pipeline.scheduler import rerun_line
+
+        rec = rerun_line(script, cast, out_dir, line_no, new_text=new_text)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
+    rel = rec.get("file", "")
+    full_rel = f"{str(out_dir).strip('/')}/{rel}" if rel else ""  # outputs/web/E01/xxx.wav
+    return {
+        "ok": rec["status"] == "ok", "rec": {**rec, "file": full_rel},
+        "audio_url": f"/api/audio?path={full_rel}" if full_rel else "",
+        "waveform": wav_waveform(REPO_ROOT / full_rel) if full_rel else [],
+    }
+
+
 @app.get("/api/audio")
 def audio_get(path: str = Query(...)):
     p = _safe_audio(path)

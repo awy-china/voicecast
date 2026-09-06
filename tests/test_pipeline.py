@@ -175,3 +175,29 @@ def test_scheduler_on_line_callback(tmp_path):
     assert events[0]["role"] == "林锋"
     # 回调顺序与结果记录一致
     assert [e["line_no"] for e in events] == [r["line_no"] for r in result["records"]]
+
+
+def test_rerun_line_overwrites(tmp_path, monkeypatch):
+    """单句修复：rerun_line 重跑指定行并覆盖原文件（只动那一句）。"""
+    from pathlib import Path
+    import hashlib
+
+    from voicecast.core.models import Project
+    from voicecast.pipeline.parser import parse_file
+    from voicecast.pipeline.scheduler import load_cast, rerun_line, run_batch
+
+    out = tmp_path / "out"
+    proj = Project(name="t", script_path="examples/script_demo.txt",
+                   cast_path="examples/cast_demo.yaml", output_dir=out,
+                   budget_per_episode=0)
+    s = parse_file("examples/script_demo.txt")
+    c = load_cast("examples/cast_demo.yaml")
+    # 全量干跑计划 + 取第 1 行的文件路径（dry 不产生音频，仅验证 rerun 路径生成一致）
+    r = run_batch(proj, s, c, dry_run=True)
+    planned = next(x for x in r["records"] if x["line_no"] == 1 and x["status"] == "planned")
+    rec = rerun_line("examples/script_demo.txt", "examples/cast_demo.yaml",
+                     str(out), 1)
+    assert rec["status"] == "ok"
+    # 文件落在与 run_batch 规划一致的路径（line_filename 同规则）
+    assert Path(out, planned["file"]).exists()
+    assert rec["file"] == planned["file"]

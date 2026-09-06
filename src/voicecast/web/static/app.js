@@ -260,7 +260,8 @@ $("batchBtn").addEventListener("click", async () => {
           total = evt.ok + evt.error + (evt.blocked || 0);
           count.textContent = "完成";
           $("batchSummaryText").textContent =
-            `成功 ${evt.ok} / 失败 ${evt.error} / 拦截 ${evt.blocked || 0} / 成本 ${evt.total_cost} 元`;
+            `成功 ${evt.ok} / 失败 ${evt.error} / 拦截 ${evt.blocked || 0} / 成本 ${evt.total_cost} 元 · 点击行内按钮可试听/单句重生成`;
+          renderBatchTable(evt.rows || []);
           $("batchSummary").classList.remove("hidden");
         } else if (evt.type === "error") {
           const line = document.createElement("div");
@@ -282,6 +283,59 @@ function esc(s) {
   const d = document.createElement("div");
   d.textContent = s == null ? "" : String(s);
   return d.innerHTML;
+}
+
+/* ---------- 批量结果操作表（试听 / 单句重生成） ---------- */
+let rerunAudio = null;
+
+function renderBatchTable(rows) {
+  const wrap = $("batchTableWrap");
+  if (!rows || !rows.length) { wrap.innerHTML = ""; return; }
+  const outDir = $("batchOut").value.trim() || "outputs/web";
+  const okRows = rows.filter((r) => r[3] === "ok");
+  const table = document.createElement("table");
+  table.className = "batch-table";
+  table.innerHTML = `<thead><tr><th>行</th><th>角色</th><th>引擎</th><th>句文本</th><th>操作</th></tr></thead>`;
+  const tbody = document.createElement("tbody");
+  for (const r of okRows) {
+    const [lineNo, , role, , engine, file] = r;
+    const tr = document.createElement("tr");
+    tr.dataset.lineNo = lineNo;
+    const audioUrl = `/api/audio?path=${encodeURIComponent(outDir + "/" + file)}`;
+    tr.innerHTML =
+      `<td class="n">${lineNo}</td>` +
+      `<td>${esc(role)}</td><td class="eng">${esc(engine)}</td>` +
+      `<td class="txt" title="${esc(file)}"></td>` +
+      `<td class="ops">` +
+      `<button class="mini-btn play" title="试听">▶</button> ` +
+      `<button class="mini-btn rerun" title="重生成该句（覆盖原文件）">↻</button>` +
+      `</td>`;
+    tr.querySelector(".txt").textContent = String(file).split("/").pop();
+    tr.querySelector(".play").addEventListener("click", () => {
+      if (rerunAudio) rerunAudio.pause();
+      rerunAudio = new Audio(audioUrl);
+      rerunAudio.play();
+    });
+    tr.querySelector(".rerun").addEventListener("click", async (e) => {
+      const btn = e.target;
+      btn.textContent = "…"; btn.disabled = true;
+      try {
+        const res = await fetch("/api/rerun", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ script: $("batchScript").value.trim(),
+            cast: $("batchCast").value.trim(), out_dir: outDir, line_no: Number(lineNo) }),
+        });
+        const data = await res.json();
+        btn.textContent = data.ok ? "✓" : "✗";
+        if (!data.ok && data.detail) alert("重生成失败: " + data.detail);
+      } catch (err) { btn.textContent = "✗"; alert("网络错误: " + err.message); }
+      finally { setTimeout(() => { btn.textContent = "↻"; btn.disabled = false; }, 1200); }
+    });
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.innerHTML = "";
+  wrap.appendChild(table);
 }
 
 /* ---------- 启动 ---------- */

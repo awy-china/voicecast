@@ -289,6 +289,31 @@ label { display: block; font-size: 12px; color: var(--text3);
 ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 ::-webkit-scrollbar-track { background: transparent; }
 
+/* ---------- 批量结果表 ---------- */
+.batch-table-wrap { margin-top: 12px; overflow-x: auto; }
+.batch-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.batch-table th {
+  text-align: left; color: var(--text3); font-weight: 600;
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  font-size: 11px; letter-spacing: 0.08em;
+}
+.batch-table td {
+  padding: 7px 10px; border-bottom: 1px solid var(--border);
+  color: var(--text2); font-family: var(--mono); font-size: 12px;
+}
+.batch-table td.n { color: var(--text3); }
+.batch-table td.eng { color: var(--amber); }
+.batch-table td.txt { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.batch-table td.ops { white-space: nowrap; text-align: right; }
+.mini-btn {
+  background: var(--panel2); border: 1px solid var(--border-strong);
+  color: var(--text2); border-radius: 6px; cursor: pointer;
+  width: 26px; height: 24px; font-size: 12px; line-height: 1;
+  transition: all 0.15s ease;
+}
+.mini-btn:hover { border-color: var(--amber-dim); color: var(--amber); }
+.mini-btn:disabled { opacity: 0.5; cursor: wait; }
+
 /* ---------- 减弱动效 ---------- */
 @media (prefers-reduced-motion: reduce) {
   #boot { animation: none; }

@@ -48,6 +48,52 @@ def resolve_role_profile(cast: Cast, role_name: str) -> tuple[Role, VoiceProfile
     return role, profile
 
 
+def rerun_line(
+    script_path: str, cast_path: str, out_dir: Path | str,
+    line_no: int, new_text: str | None = None, registry: EngineRegistry | None = None,
+) -> dict:
+    """单句修复：只重新合成指定行，覆盖原文件（不改动其他已生成音频）。
+
+    用于生产工作流——批量后发现某句口误/错字/语气不对，只重跑那一句。
+    new_text: 修改后的文本（改错字场景）；None 则用原文本重生成。
+    返回该句的最新记录（status/file/error）。
+    """
+    from .parser import parse_file
+
+    s = parse_file(script_path)
+    ln = next((l for l in s.lines if l.line_no == line_no), None)
+    if ln is None:
+        raise VoicecastError(f"剧本中没有第 {line_no} 行")
+    if new_text is not None and new_text.strip():
+        ln.text = new_text.strip()
+
+    c = load_cast(cast_path)
+    project = Project(name=s.title, script_path=script_path, cast_path=cast_path,
+                      output_dir=Path(out_dir), budget_per_episode=0)
+    registry = registry or EngineRegistry()
+    role, profile = resolve_role_profile(c, ln.role)
+    engine = route_engine(profile, project, registry)
+
+    out_root = project.output_dir
+    out_root.mkdir(parents=True, exist_ok=True)
+    filename = line_filename(ln.episode, ln.scene, role.id, ln.line_no)
+    rel_path = f"E{ln.episode:02d}/{filename}"
+    out_path = out_root / rel_path
+
+    engine.synthesize(ln.text, profile, out_path, emotion=ln.emotion)
+    try:
+        postprocess_audio(out_path, level=str(profile.params.get("postprocess", "natural")))
+    except Exception as e:  # noqa: BLE001
+        logger.warning("单句后处理失败，使用原始输出: %s", e)
+
+    return {
+        "line_no": ln.line_no, "episode": ln.episode, "scene": ln.scene,
+        "role": ln.role, "text": ln.text, "emotion": ln.emotion,
+        "status": "ok", "engine": engine.name, "file": rel_path,
+        "voice_profile": profile.id,
+    }
+
+
 def run_batch(
     project: Project,
     script: Script,
