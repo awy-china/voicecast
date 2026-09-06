@@ -85,6 +85,31 @@ def blend_cmd(
         console.print(f"[green]✅ 已保存:[/green] {path}（规则引擎/批量配音可用）")
 
 
+@app.command("export")
+def export_cmd(
+    out_dir: str = typer.Argument(..., help="批量配音输出目录（含 manifest.json）"),
+    title: str = typer.Option("配音成品", "--title", help="交付包标题"),
+) -> None:
+    """剪映交付包：从输出目录生成 SRT 字幕 + 导入说明（音频在 out_dir，字幕包在其旁）。"""
+    import json
+
+    manifest = Path(out_dir) / "manifest.json"
+    if not manifest.exists():
+        console.print(f"[red]❌ 找不到 {manifest}——先跑 voicecast run[/red]")
+        return
+    records = json.loads(manifest.read_text(encoding="utf-8")).get("records", [])
+    if not records:
+        console.print("[red]❌ manifest 为空[/red]")
+        return
+    from ..deliver.jianying import export_deliver
+
+    deliver = export_deliver(records, Path(out_dir), title=title)
+    srt = sorted(deliver.glob("*.srt"))
+    console.print(f"[green]✅ 剪映交付包:[/green] {deliver}")
+    console.print(f"  字幕 {len(srt)} 个：{[s.name for s in srt]}")
+    console.print(f"  导入说明: {deliver / '导入说明.txt'}")
+
+
 @app.command("run")
 def run_cmd(
     script: Path = typer.Argument(..., help="剧本文件（txt 标记式或 JSON）"),

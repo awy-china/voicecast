@@ -338,6 +338,81 @@ function renderBatchTable(rows) {
   wrap.appendChild(table);
 }
 
+/* ---------- 剪映交付包导出 ---------- */
+$("batchExportBtn").addEventListener("click", async () => {
+  const btn = $("batchExportBtn"), out = $("exportResult");
+  out.textContent = "导出中…";
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/export", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ out_dir: $("batchOut").value.trim() || "outputs/web" }),
+    });
+    const data = await res.json();
+    if (!res.ok) { out.textContent = "❌ " + (data.detail || "导出失败"); return; }
+    out.textContent = `✅ 剪映包: ${data.deliver}（字幕: ${(data.srt || []).join("、")}）`;
+  } catch (e) { out.textContent = "❌ " + e.message; }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- 音色资产工作台 ---------- */
+let allAssets = [];
+let assetFilter = "all";
+let assetAudio = null;
+
+async function loadAssets() {
+  try {
+    const res = await fetch("/api/recipes");
+    allAssets = await res.json();
+    renderAssets();
+  } catch (_) { /* 静默 */ }
+}
+
+function renderAssets() {
+  const grid = $("assetsGrid");
+  const q = ($("assetsSearch").value || "").toLowerCase();
+  const list = allAssets.filter((a) => {
+    if (assetFilter === "真人" && !a.tags.includes("真人参考")) return false;
+    if (assetFilter === "融合" && !a.tags.includes("融合")) return false;
+    if (assetFilter === "edge" && !a.engine.startsWith("edge") && a.tags.includes("真人参考")) return false;
+    if (q && !`${a.id} ${a.name} ${a.tags.join(" ")}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  grid.innerHTML = "";
+  for (const a of list) {
+    const card = document.createElement("div");
+    card.className = "asset-card";
+    const kind = a.tags.includes("真人参考") ? "真人" : a.tags.includes("融合") ? "融合" : "基础";
+    card.innerHTML =
+      `<div class="asset-top"><span class="asset-kind k-${kind === "真人" ? "real" : kind === "融合" ? "blend" : "base"}">${kind}</span>` +
+      `<button class="mini-btn play" ${a.preview ? "" : "disabled"} title="试听参考音频">▶</button></div>` +
+      `<div class="asset-id">${esc(a.id)}</div>` +
+      `<div class="asset-name">${esc(a.name)}</div>` +
+      `<div class="asset-tags">${a.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>` +
+      `<div class="asset-engine">${esc(a.engine)}</div>`;
+    if (a.preview) {
+      card.querySelector(".play").addEventListener("click", () => {
+        if (assetAudio) assetAudio.pause();
+        assetAudio = new Audio(a.preview);
+        assetAudio.play();
+      });
+    }
+    grid.appendChild(card);
+  }
+  if (!list.length) grid.innerHTML = `<div class="assets-empty">无匹配音色</div>`;
+}
+
+document.querySelectorAll("#assetsFilter .chip").forEach((c) => {
+  c.addEventListener("click", () => {
+    document.querySelectorAll("#assetsFilter .chip").forEach((x) => x.classList.remove("active"));
+    c.classList.add("active");
+    assetFilter = c.dataset.f;
+    renderAssets();
+  });
+});
+$("assetsSearch").addEventListener("input", renderAssets);
+
 /* ---------- 启动 ---------- */
 loadEngines();
 loadSamples();
+loadAssets();

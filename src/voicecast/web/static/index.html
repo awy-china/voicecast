@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VoiceCast 声演工作室</title>
-<link rel="stylesheet" href="/static/style.css?v=20260903">
+<link rel="stylesheet" href="/static/style.css?v=20260904">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body>
@@ -45,6 +45,10 @@
       <button class="nav-item" data-view="batch">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <span>批量配音</span>
+      </button>
+      <button class="nav-item" data-view="assets">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>音色资产</span>
       </button>
     </nav>
     <div class="side-status">
@@ -156,12 +160,34 @@
         <div class="result-head"><div class="result-id">完成</div>
           <div class="result-meta" id="batchSummaryText"></div></div>
         <div class="batch-table-wrap" id="batchTableWrap"></div>
+        <div class="batch-export-row">
+          <button id="batchExportBtn" class="btn-ghost">📦 导出剪映包（SRT 字幕+导入说明）</button>
+          <span id="exportResult" class="design-hint" style="margin:0"></span>
+        </div>
       </div>
+    </section>
+
+    <!-- 视图 4：音色资产 -->
+    <section class="view" id="view-assets">
+      <div class="view-head">
+        <h1>音色资产库</h1>
+        <p class="view-sub">全部可用音色——真人参考 / 融合 / 基础配方。试听、筛选、随时用于角色。</p>
+      </div>
+      <div class="assets-toolbar">
+        <div class="assets-filter" id="assetsFilter">
+          <button class="chip active" data-f="all">全部</button>
+          <button class="chip" data-f="真人">真人参考</button>
+          <button class="chip" data-f="融合">融合</button>
+          <button class="chip" data-f="edge">edge 基础</button>
+        </div>
+        <input id="assetsSearch" class="input assets-search" placeholder="搜索音色…（id/名称/标签）" spellcheck="false">
+      </div>
+      <div class="assets-grid" id="assetsGrid"></div>
     </section>
 
   </main>
 </div>
 
-<script src="/static/app.js?v=20260903"></script>
+<script src="/static/app.js?v=20260904"></script>
 </body>
 </html>

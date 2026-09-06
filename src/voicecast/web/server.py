@@ -43,8 +43,11 @@ STATIC = Path(__file__).resolve().parent / "static"
 
 def _safe_audio(path: str) -> Path:
     p = (REPO_ROOT / path).resolve()
-    out_root = OUTPUTS_DIR.resolve()
-    if not str(p).startswith(str(out_root)):
+    allowed = [
+        OUTPUTS_DIR.resolve(),
+        (REPO_ROOT / "recipes" / "samples" / "ref").resolve(),  # 参考库试听
+    ]
+    if not any(str(p).startswith(str(a)) for a in allowed):
         raise HTTPException(status_code=403, detail="路径越界")
     if not p.exists():
         raise HTTPException(status_code=404, detail=f"音频不存在: {path}")
@@ -81,9 +84,12 @@ def recipes_api(q: str = ""):
     for p in lib.values():
         if q and q not in f"{p.id} {p.name} {' '.join(p.tags)}":
             continue
+        ref = p.params.get("ref_file") or p.params.get("ref_audio_path") or ""
         rows.append({
             "id": p.id, "name": p.name, "tags": p.tags,
-            "engine": p.engine.host, "ref": p.params.get("ref_file", ""),
+            "engine": p.engine.host, "ref": ref,
+            # 参考音频试听 URL（仅参考库文件可播）
+            "preview": f"/api/audio?path=recipes/samples/ref/{ref.split('/')[-1]}" if "samples/ref" in ref else "",
         })
     rows.sort(key=lambda r: r["id"])
     return rows
@@ -248,6 +254,26 @@ def rerun_api(body: dict):
         "audio_url": f"/api/audio?path={full_rel}" if full_rel else "",
         "waveform": wav_waveform(REPO_ROOT / full_rel) if full_rel else [],
     }
+
+
+@app.post("/api/export")
+def export_api(body: dict):
+    """从批量输出目录生成剪映交付包（SRT 字幕+导入说明）。"""
+    out_dir = body.get("out_dir") or "outputs/web"
+    title = body.get("title") or "配音成品"
+    manifest = REPO_ROOT / out_dir / "manifest.json"
+    if not manifest.exists():
+        raise HTTPException(status_code=404, detail=f"没有 manifest.json——先跑批量配音: {out_dir}")
+    try:
+        records = json.loads(manifest.read_text(encoding="utf-8")).get("records", [])
+        from ..deliver.jianying import export_deliver
+
+        deliver = export_deliver(records, REPO_ROOT / out_dir, title=title)
+        srt = sorted(deliver.glob("*.srt"))
+        rel = str(deliver.relative_to(REPO_ROOT)).replace("\\", "/")
+        return {"ok": True, "deliver": rel, "srt": [s.name for s in srt]}
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/audio")

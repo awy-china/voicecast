@@ -314,6 +314,50 @@ label { display: block; font-size: 12px; color: var(--text3);
 .mini-btn:hover { border-color: var(--amber-dim); color: var(--amber); }
 .mini-btn:disabled { opacity: 0.5; cursor: wait; }
 
+/* ---------- 资产工作台 ---------- */
+.assets-toolbar { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.assets-filter { display: flex; gap: 6px; }
+.chip {
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--text2); border-radius: 999px; padding: 6px 14px;
+  font-size: 13px; font-family: var(--font); cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip.active { background: var(--amber); color: #1A1205; border-color: var(--amber); font-weight: 700; }
+.assets-search { max-width: 260px; }
+.assets-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.asset-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.asset-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.asset-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.asset-kind { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.05em; }
+.k-real { background: rgba(74, 222, 128, 0.12); color: var(--green); }
+.k-blend { background: var(--amber-glow); color: var(--amber); }
+.k-base { background: rgba(139, 148, 167, 0.15); color: var(--text2); }
+.asset-id { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text); }
+.asset-name { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.asset-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 11px; color: var(--text3); background: var(--panel2); padding: 1px 7px; border-radius: 4px; }
+.asset-engine { margin-top: 8px; font-size: 11px; color: var(--amber-dim); font-family: var(--mono); }
+.assets-empty { color: var(--text3); padding: 40px; text-align: center; grid-column: 1/-1; }
+
+.batch-export-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.btn-ghost {
+  background: none; border: 1px solid var(--border-strong);
+  color: var(--text2); border-radius: 8px; padding: 9px 18px;
+  font-size: 13px; font-family: var(--font); cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-ghost:hover { border-color: var(--amber-dim); color: var(--amber); }
+.btn-ghost:disabled { opacity: 0.5; cursor: wait; }
+
 /* ---------- 减弱动效 ---------- */
 @media (prefers-reduced-motion: reduce) {
   #boot { animation: none; }
