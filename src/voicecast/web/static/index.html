@@ -3,191 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VoiceCast 声演工作室</title>
-<link rel="stylesheet" href="/static/style.css?v=20260904">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>VoiceCast · 声演调音台</title>
+<link rel="stylesheet" href="/static/style.css?v=20260905">
 </head>
-<body>
+<body class="studio">
 
-<!-- 开屏揭幕 -->
+<!-- 开屏：设备通电 -->
 <div id="boot">
-  <div class="boot-inner">
-    <div class="boot-mark">
-      <div class="boot-eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    </div>
-    <div class="boot-title">VOICECAST</div>
-    <div class="boot-sub">声演工作室 · SOUND LAB</div>
+  <div class="boot-rack">
+    <div class="boot-power"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="boot-name">VOICECAST</div>
+    <div class="boot-model">声演调音台 · SOUND CONSOLE MK-II</div>
   </div>
 </div>
 
-<!-- 顶部等化器装饰条 -->
-<div class="eq-bar" id="eqBar" aria-hidden="true"></div>
+<!-- 环境光晕 -->
+<div class="ambient"></div>
 
-<div class="shell">
+<div class="console">
 
-  <aside class="side">
-    <div class="side-logo">
-      <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
-        <path d="M4 20v-8M10 24v-16M16 28V4M22 22v-12M28 18v-4"
-              stroke="#F5A623" stroke-width="2.4" stroke-linecap="round"/>
-      </svg>
-      <span>VoiceCast</span>
-    </div>
-    <nav class="nav">
-      <button class="nav-item active" data-view="design">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8v8M19 8v8M8 5v14M16 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>音色设计</span>
-      </button>
-      <button class="nav-item" data-view="blend">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span>音色混合</span>
-      </button>
-      <button class="nav-item" data-view="batch">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>批量配音</span>
-      </button>
-      <button class="nav-item" data-view="assets">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>音色资产</span>
-      </button>
-    </nav>
-    <div class="side-status">
-      <div id="engineDots" class="engine-dots"></div>
-      <div class="side-status-text">引擎状态</div>
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <!-- 视图 1：音色设计 -->
-    <section class="view active" id="view-design">
-      <div class="view-head">
-        <h1>音色设计器</h1>
-        <p class="view-sub">描述你想要的角色声音——直接生成，波形即答案。</p>
+  <!-- ═══ 顶部设备架（引擎电源 + 音色资产设备）═══ -->
+  <header class="rack">
+    <div class="rack-left">
+      <div class="brand">
+        <div class="brand-eq"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="brand-txt">VOICECAST<small>SOUND CONSOLE MK-II</small></div>
       </div>
-      <div class="card design-card">
-        <div class="input-row">
-          <input id="designDesc" class="big-input" type="text"
-                 placeholder="如：老年女声 / 反派中年男声，低沉阴险"
-                 autocomplete="off" spellcheck="false">
-          <button id="designBtn" class="btn-primary">生成音色</button>
+      <div class="power-leds" id="engineLeds" title="引擎状态"></div>
+    </div>
+    <div class="rack-units" id="rackUnits"></div>
+  </header>
+
+  <!-- ═══ 中央调音台台面 ═══ -->
+  <main class="deck">
+
+    <!-- 台面选择（通道分区按钮） -->
+    <div class="deck-select">
+      <button class="deck-btn active" data-deck="preamp">
+        <span class="db-name">话放台</span><span class="db-sub">音色设计</span>
+      </button>
+      <button class="deck-btn" data-deck="router">
+        <span class="db-name">路由台</span><span class="db-sub">音色混合</span>
+      </button>
+      <button class="deck-btn" data-deck="transport">
+        <span class="db-name">走带台</span><span class="db-sub">批量配音</span>
+      </button>
+      <button class="deck-btn" data-deck="patchbay">
+        <span class="db-name">设备架</span><span class="db-sub">音色资产</span>
+      </button>
+    </div>
+
+    <!-- ── 话放台：音色设计 ── -->
+    <section class="deckview active" id="deck-preamp">
+      <div class="channel">
+        <div class="ch-strip">
+          <div class="ch-screw tl"></div><div class="ch-screw tr"></div>
+          <div class="ch-label">PREAMPLIFIER</div>
+          <div class="vu-meter" id="designVu">
+            <div class="vu-leds" id="designVuLeds"></div>
+            <div class="vu-mark"><span>+3</span><span>0</span><span>-3</span><span>-10</span></div>
+          </div>
+          <div class="ch-input">
+            <div class="input-label">CHARACTER BRIEF</div>
+            <input id="designDesc" class="ch-input-field" type="text"
+              placeholder="描述你的角色声音，如：老年女声 / 反派中年男声…" autocomplete="off">
+          </div>
+          <div class="ch-knob-row">
+            <div class="knob-wrap">
+              <div class="knob" id="designKnob" title="按下生成"><div class="knob-ind"></div></div>
+              <div class="knob-label">SYNTHESIZE</div>
+            </div>
+            <div class="ch-status" id="designStatus"></div>
+          </div>
         </div>
-        <div class="design-hint" id="designHint"></div>
-      </div>
-      <div class="card result-card hidden" id="designResult">
-        <div class="result-head">
-          <div class="result-id" id="designProfileId">—</div>
-          <div class="result-meta" id="designMeta"></div>
+
+        <!-- 输出监听 -->
+        <div class="ch-output">
+          <div class="out-head">
+            <span class="out-id" id="designProfileId">— NO VOICE —</span>
+            <span class="out-meta" id="designMeta"></span>
+          </div>
+          <canvas id="designWave" class="out-wave" height="110"></canvas>
+          <div class="out-params" id="designParams"></div>
+          <div class="out-transport">
+            <button class="tbtn play" id="designPlay">▶</button>
+            <div class="out-time" id="designTime">00:00.0</div>
+          </div>
+          <audio id="designAudio" style="display:none"></audio>
         </div>
-        <div class="wave-wrap">
-          <canvas id="designWave" height="120"></canvas>
-          <button class="play-btn" id="designPlay" title="试听">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-        </div>
-        <audio id="designAudio" style="display:none"></audio>
-        <div class="result-params" id="designParams"></div>
       </div>
     </section>
 
-    <!-- 视图 2：音色混合 -->
-    <section class="view" id="view-blend">
-      <div class="view-head">
-        <h1>音色混合器</h1>
-        <p class="view-sub">主参考 × 辅助参考——GPT-SoVITS 多说话人融合，造出两个源都没有的独特声音。</p>
-      </div>
-      <div class="card blend-card">
-        <div class="blend-row">
-          <div class="blend-field">
-            <label>主参考（韵律骨架）</label>
-            <select id="blendMain" class="select"></select>
-          </div>
-          <div class="blend-plus">×</div>
-          <div class="blend-field">
-            <label>辅助参考（渗入音色）</label>
-            <select id="blendAux" class="select" multiple size="4"></select>
-          </div>
-          <button id="blendBtn" class="btn-primary">融合生成</button>
+    <!-- ── 路由台：音色混合 ── -->
+    <section class="deckview" id="deck-router">
+      <div class="router">
+        <div class="r-in a">
+          <div class="r-label">SOURCE A · 主参考</div>
+          <select id="blendMain" class="r-select"></select>
         </div>
-        <div class="design-hint" id="blendHint"></div>
-      </div>
-      <div class="card result-card hidden" id="blendResult">
-        <div class="result-head">
-          <div class="result-id" id="blendProfileId">—</div>
-          <div class="result-meta" id="blendMeta"></div>
+        <div class="r-fader-zone">
+          <div class="r-fader-label">BLEND</div>
+          <div class="r-merge-lamp" id="blendLamp"></div>
+          <button class="tbtn rec" id="blendBtn" title="融合生成">●</button>
         </div>
-        <div class="wave-wrap">
-          <canvas id="blendWave" height="120"></canvas>
-          <button class="play-btn" id="blendPlay" title="试听">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </button>
+        <div class="r-in b">
+          <div class="r-label">SOURCE B · 辅助参考（可多选）</div>
+          <select id="blendAux" class="r-select" multiple size="5"></select>
+        </div>
+      </div>
+      <div class="r-status" id="blendStatus"></div>
+      <div class="ch-output compact">
+        <div class="out-head">
+          <span class="out-id" id="blendProfileId">— MIX BUS —</span>
+          <span class="out-meta" id="blendMeta"></span>
+        </div>
+        <canvas id="blendWave" class="out-wave" height="90"></canvas>
+        <div class="out-transport">
+          <button class="tbtn play" id="blendPlay">▶</button>
+          <div class="out-time" id="blendTime">00:00.0</div>
         </div>
         <audio id="blendAudio" style="display:none"></audio>
       </div>
     </section>
 
-    <!-- 视图 3：批量配音 -->
-    <section class="view" id="view-batch">
-      <div class="view-head">
-        <h1>批量配音</h1>
-        <p class="view-sub">剧本 → 分角色 → 逐句生成，实时进度滚动。</p>
-      </div>
-      <div class="card batch-card">
-        <div class="batch-grid">
-          <div class="batch-field">
-            <label>剧本文件</label>
-            <input id="batchScript" class="input" value="examples/script_demo.txt" spellcheck="false">
-          </div>
-          <div class="batch-field">
-            <label>角色表</label>
-            <input id="batchCast" class="input" value="examples/cast_demo.yaml" spellcheck="false">
-          </div>
-          <div class="batch-field">
-            <label>输出目录</label>
-            <input id="batchOut" class="input" value="outputs/web" spellcheck="false">
-          </div>
+    <!-- ── 走带台：批量配音 ── -->
+    <section class="deckview" id="deck-transport">
+      <div class="tape">
+        <div class="tape-io">
+          <div class="io-row"><span class="io-label">SCRIPT</span>
+            <input id="batchScript" class="io-input" value="examples/script_demo.txt"></div>
+          <div class="io-row"><span class="io-label">CAST</span>
+            <input id="batchCast" class="io-input" value="examples/cast_demo.yaml"></div>
+          <div class="io-row"><span class="io-label">OUT</span>
+            <input id="batchOut" class="io-input" value="outputs/web"></div>
         </div>
-        <div class="batch-actions">
-          <label class="check"><input type="checkbox" id="batchDry"> 仅规划（不生成）</label>
-          <button id="batchBtn" class="btn-primary">开始配音</button>
+        <div class="tape-meter">
+          <div class="tape-counter" id="tapeCounter">00:00:00</div>
+          <div class="tape-progress"><div class="tape-progress-bar" id="tapeProgressBar"></div></div>
+          <div class="tape-count" id="tapeCount">0/0</div>
+        </div>
+        <div class="tape-transport">
+          <label class="tbtn-toggle"><input type="checkbox" id="batchDry">DRY</label>
+          <button class="tbtn rec big" id="batchBtn" title="开始批量配音">●</button>
+          <button class="tbtn ghost" id="batchExportBtn" title="导出剪映包（SRT 字幕）">⏏</button>
         </div>
       </div>
-      <div class="card log-card hidden" id="batchLogCard">
-        <div class="log-head">实时进度 <span class="log-count" id="logCount">0/0</span></div>
-        <div class="log-list" id="logList"></div>
-      </div>
-      <div class="card result-card hidden" id="batchSummary">
-        <div class="result-head"><div class="result-id">完成</div>
-          <div class="result-meta" id="batchSummaryText"></div></div>
-        <div class="batch-table-wrap" id="batchTableWrap"></div>
-        <div class="batch-export-row">
-          <button id="batchExportBtn" class="btn-ghost">📦 导出剪映包（SRT 字幕+导入说明）</button>
-          <span id="exportResult" class="design-hint" style="margin:0"></span>
-        </div>
+      <div class="tape-log-wrap hidden" id="tapeLogWrap">
+        <div class="tape-log-head">RUNNING LOG <span id="logCount"></span></div>
+        <div class="tape-log" id="tapeLog"></div>
+        <div class="tape-result" id="exportResult"></div>
       </div>
     </section>
 
-    <!-- 视图 4：音色资产 -->
-    <section class="view" id="view-assets">
-      <div class="view-head">
-        <h1>音色资产库</h1>
-        <p class="view-sub">全部可用音色——真人参考 / 融合 / 基础配方。试听、筛选、随时用于角色。</p>
-      </div>
-      <div class="assets-toolbar">
-        <div class="assets-filter" id="assetsFilter">
-          <button class="chip active" data-f="all">全部</button>
-          <button class="chip" data-f="真人">真人参考</button>
-          <button class="chip" data-f="融合">融合</button>
-          <button class="chip" data-f="edge">edge 基础</button>
+    <!-- ── 设备架：音色资产 ── -->
+    <section class="deckview" id="deck-patchbay">
+      <div class="patch-head">
+        <div class="patch-filters" id="patchFilters">
+          <button class="chip active" data-f="all">ALL UNITS</button>
+          <button class="chip" data-f="真人">HUMAN REF</button>
+          <button class="chip" data-f="融合">BLEND</button>
+          <button class="chip" data-f="edge">EDGE BASE</button>
         </div>
-        <input id="assetsSearch" class="input assets-search" placeholder="搜索音色…（id/名称/标签）" spellcheck="false">
+        <input id="assetsSearch" class="patch-search" placeholder="搜索音色… id/名称/标签">
       </div>
-      <div class="assets-grid" id="assetsGrid"></div>
+      <div class="patch-grid" id="patchGrid"></div>
     </section>
 
   </main>
+
+  <!-- ═══ 底部状态条 ═══ -->
+  <footer class="statusbar">
+    <div class="sb-left" id="sbMsg">SYSTEM READY</div>
+    <div class="sb-right">
+      <span class="sb-clock" id="sbClock"></span>
+    </div>
+  </footer>
 </div>
 
-<script src="/static/app.js?v=20260904"></script>
+<script src="/static/app.js?v=20260905"></script>
 </body>
 </html>
