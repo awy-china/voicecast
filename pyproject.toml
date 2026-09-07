@@ -30,8 +30,8 @@ dependencies = [
 dev = ["pytest>=8.2"]
 
 [project.urls]
-Homepage = "https://github.com/yourname/voicecast"
-Issues = "https://github.com/yourname/voicecast/issues"
+Homepage = "https://github.com/awy-china/voicecast"
+Issues = "https://github.com/awy-china/voicecast/issues"
 
 [project.scripts]
 voicecast = "voicecast.cli.main:app"
