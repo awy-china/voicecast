@@ -26,7 +26,21 @@ const ctx = field.getContext("2d");
 let W = 0, H = 0, storm = 0, mouseX = -9999;
 let lines = [];
 const LINE_N = 8;
-const AMBER = [245, 166, 35], CYAN = [53, 224, 192];
+const CYAN = [53, 224, 192];
+/* 场景色（Anime.js 式颜色导航：每功能区一色） */
+const SCENE_RGB = {
+  design: [245, 166, 35], blend: [53, 224, 192],
+  batch: [111, 168, 255], assets: [61, 220, 132],
+};
+let curScene = "design";
+
+function applySceneColor(scene) {
+  curScene = scene;
+  const rgb = SCENE_RGB[scene] || SCENE_RGB.design;
+  lines.forEach((ln, i) => {
+    ln.mix = i % 5 === 4 ? CYAN : rgb;   // 主色 + 1/5 青点缀（对比）
+  });
+}
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
@@ -41,10 +55,11 @@ function resize() {
       speed: 0.25 + Math.random() * 0.45,
       phase: Math.random() * Math.PI * 2,
       freq: 0.008 + Math.random() * 0.012,
-      mix: i % 2 === 0 ? AMBER : CYAN,
+      mix: CYAN,
       alpha: 0.16 + Math.random() * 0.16,
     });
   }
+  applySceneColor(curScene);
 }
 window.addEventListener("resize", resize);
 resize();
@@ -137,10 +152,14 @@ document.querySelectorAll(".rail-item").forEach((btn) => {
     document.querySelectorAll(".rail-item").forEach((b) => b.classList.remove("active"));
     document.querySelectorAll(".scene").forEach((s) => s.classList.remove("active"));
     btn.classList.add("active");
-    const sc = $("scene-" + btn.dataset.view);
+    const view = btn.dataset.view;
+    const sc = $("scene-" + view);
     sc.classList.remove("active");
     void sc.offsetWidth; // 重启动画
     sc.classList.add("active");
+    // 色彩分段叙事：body 场景色 + 波形场换色（颜色即导航）
+    document.body.className = "acc-" + view;
+    applySceneColor(view);
     splitActiveTitles();
     const grid = $("assetGrid");
     if (grid) renderAssets();
@@ -163,8 +182,8 @@ async function loadEngines() {
   } catch (_) { /* 静默 */ }
 }
 
-/* ══════════ 波形绘制（结果卡） ══════════ */
-function drawWave(canvas, points, playing = false) {
+/* ══════════ 波形绘制（结果卡 + 播放扫描线） ══════════ */
+function drawWave(canvas, points, playing = false, progress = 0) {
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
@@ -179,10 +198,12 @@ function drawWave(canvas, points, playing = false) {
     return;
   }
   const step = w / n;
+  const cs = getComputedStyle(document.body);
+  const acc = (cs.getPropertyValue("--acc-rgb").trim() || "245, 166, 35").replace(/\s+/g, " ");
   const grad = c2.createLinearGradient(0, 0, w, 0);
-  grad.addColorStop(0, "rgba(245,166,35,0.4)");
-  grad.addColorStop(0.5, "rgba(245,166,35,0.95)");
-  grad.addColorStop(1, "rgba(255,192,77,0.5)");
+  grad.addColorStop(0, `rgba(${acc.replace("#", "")},0.35)`);
+  grad.addColorStop(0.5, `rgba(${acc},0.95)`);
+  grad.addColorStop(1, `rgba(${acc},0.5)`);
   c2.beginPath();
   for (let i = 0; i < n; i++) {
     const x = i * step, amp = Math.max(2, points[i] * h * 0.4);
@@ -195,9 +216,21 @@ function drawWave(canvas, points, playing = false) {
   c2.closePath();
   c2.fillStyle = grad;
   c2.fill();
-  if (playing) {
-    c2.fillStyle = "rgba(255,255,255,0.07)";
-    c2.fillRect(0, 0, w, h);
+  // 播放扫描线（剪辑软件播放头感：随进度推进）
+  if (playing && progress >= 0) {
+    const px = progress * w;
+    const pg = c2.createLinearGradient(0, 0, 0, h);
+    pg.addColorStop(0, "rgba(255,255,255,0)");
+    pg.addColorStop(0.5, `rgba(${acc},0.28)`);
+    pg.addColorStop(1, "rgba(255,255,255,0)");
+    c2.fillStyle = pg;
+    c2.fillRect(Math.max(0, px - 40), 0, 80, h);
+    c2.fillStyle = `rgba(255,255,255,0.85)`;
+    c2.fillRect(px - 1, 0, 2, h);
+    c2.shadowColor = `rgba(${acc},0.8)`;
+    c2.shadowBlur = 8;
+    c2.fillRect(px - 1, 0, 2, h);
+    c2.shadowBlur = 0;
   }
 }
 function fmtTime(s) {
@@ -219,7 +252,9 @@ function bindPlayer(btnId, audioId, waveId, timeId, getUrl) {
     audio.src = url; audio.play(); window.__play = audio;
     const tick = () => {
       if (tc) tc.textContent = fmtTime(audio.currentTime);
-      if (canvas.__pts) drawWave(canvas, canvas.__pts, true);
+      const dur = audio.duration || 0;
+      const prog = dur ? audio.currentTime / dur : 0;
+      if (canvas.__pts) drawWave(canvas, canvas.__pts, true, prog);  // 扫描线随播放推进
       raf = requestAnimationFrame(tick);
     };
     tick();
@@ -452,6 +487,25 @@ async function loadAssets() {
     renderAssets();
   } catch (_) { /* 静默 */ }
 }
+/* 资产卡滚动入场（Obys 滚动叙事：IntersectionObserver 逐卡浮现） */
+let cardObserver = null;
+function watchCards() {
+  if (!("IntersectionObserver" in window)) {
+    document.querySelectorAll(".asset-card").forEach((c) => c.classList.add("visible"));
+    return;
+  }
+  if (!cardObserver) {
+    cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.add("visible");
+          cardObserver.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -40px" });
+  }
+  document.querySelectorAll(".asset-card:not(.visible)").forEach((c) => cardObserver.observe(c));
+}
 function renderAssets() {
   const grid = $("assetGrid");
   if (!grid) return;
@@ -464,9 +518,10 @@ function renderAssets() {
     return true;
   });
   grid.innerHTML = "";
-  for (const a of list) {
+  list.forEach((a, i) => {
     const c = document.createElement("div");
     c.className = "asset-card";
+    c.style.transitionDelay = (i % 6) * 0.05 + "s";  // stagger（可见后上浮）
     const kind = a.tags.includes("真人参考") ? "HUMAN" : a.tags.includes("融合") ? "BLEND" : "SYNTH";
     const kcls = a.tags.includes("真人参考") ? "real" : a.tags.includes("融合") ? "blend" : "";
     c.innerHTML =
@@ -486,8 +541,9 @@ function renderAssets() {
       if (a.preview) { if (assetAudio) assetAudio.pause(); assetAudio = new Audio(a.preview); assetAudio.play(); }
     });
     grid.appendChild(c);
-  }
+  });
   if (!list.length) grid.innerHTML = "<div style='color:#5A6472;padding:46px;text-align:center;grid-column:1/-1;font-family:var(--mono)'>NO UNITS MATCH</div>";
+  watchCards();
 }
 document.querySelectorAll("#filterChips .chip").forEach((ch) => {
   ch.addEventListener("click", () => {
@@ -515,3 +571,5 @@ function esc(s) {
 /* ══════════ 启动 ══════════ */
 splitActiveTitles();
 loadEngines(); loadSamples(); loadAssets();
+/* 初始场景色（design） */
+document.body.className = "acc-design";
