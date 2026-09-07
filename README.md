@@ -2,6 +2,10 @@
 
 **以角色为中心的 AI 配音工作台** —— 描述/混合/微调"造出"角色专属声音，角色表锁死跨集一致，剧本一键批量出**可直进剪映的成品包**（分句音频 + 对齐 SRT 字幕）。
 
+<p align="center">
+  <img src="assets/voicecast-hero.png" alt="VoiceCast 声波幻境界面" width="820">
+</p>
+
 **本地优先、零供应商依赖**——无任何 API key 也能全流程运行；GPT-SoVITS / F5-TTS / edge-tts / MiniMax 都是可插拔引擎。
 
 > ⚠️ 项目仍处开发期（Beta）。界面（Web 前端）与引擎层持续迭代中。
