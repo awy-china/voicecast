@@ -30,13 +30,22 @@ class GPTSovitsEngine(Engine):
     def __init__(self, base_url: str = DEFAULT_URL, timeout: float = 120.0):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self._avail_at = 0.0  # 可用性缓存（服务离线时避免每配方 2s+ 探测卡死）
+        self._avail = False
 
     def available(self) -> bool:
+        import time
+
+        now = time.time()
+        if now - self._avail_at < 5.0:
+            return self._avail
         try:
             r = httpx.get(f"{self.base_url}/", timeout=3)
-            return r.status_code < 500
+            self._avail = r.status_code < 500
         except Exception:  # noqa: BLE001
-            return False
+            self._avail = False
+        self._avail_at = now
+        return self._avail
 
     def explain(self) -> str:
         return f"{self.display_name}（{self.base_url}，0 元）"

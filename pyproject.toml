@@ -1,21 +1,37 @@
 [project]
 name = "voicecast"
-version = "0.1.0"
-description = "以角色为中心的 AI 配音工作台：凭空设计角色音色，一键批量配音，本地优先、零供应商依赖"
+version = "0.2.0"
+description = "以角色为中心的 AI 配音工作台：凭空设计/融合角色音色，一键批量配音出片。本地优先、零供应商依赖，无任何 API key 也能全流程运行"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["tts", "voice-clone", "ai-voice", "配音", "GPT-SoVITS", "F5-TTS"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
 dependencies = [
     "pydantic>=2.7",
     "typer>=0.12",
-    "gradio>=4.44",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
     "edge-tts>=6.1",
     "httpx>=0.27",
     "PyYAML>=6.0",
     "rich>=13.7",
+    "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.2"]
+
+[project.urls]
+Homepage = "https://github.com/yourname/voicecast"
+Issues = "https://github.com/yourname/voicecast/issues"
 
 [project.scripts]
 voicecast = "voicecast.cli.main:app"

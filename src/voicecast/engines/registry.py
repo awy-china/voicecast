@@ -12,9 +12,23 @@ from .minimax_engine import MiniMaxEngine
 # 成本序：本地免费优先；GPT-SoVITS 是"质量档"（服务启动才参与路由）
 DEFAULT_ORDER = ["local", "gpt_sovits", "edge_tts", "minimax"]
 
+_INSTANCE: "EngineRegistry | None" = None
+
 
 class EngineRegistry:
+    """引擎注册表。单例：引擎实例跨调用复用（可用性缓存/lazy 初始化生效）。"""
+
+    def __new__(cls, *args, **kwargs):
+        if args or kwargs:
+            return super().__new__(cls)  # 显式注入（测试 mock）→ 独立实例
+        global _INSTANCE
+        if _INSTANCE is None:
+            _INSTANCE = super().__new__(cls)
+        return _INSTANCE
+
     def __init__(self, engines: list[Engine] | None = None) -> None:
+        if getattr(self, "_engines", None) is not None:
+            return  # 单例防重入：实例已初始化则跳过
         self._engines: dict[str, Engine] = {
             e.name: e
             for e in (engines if engines is not None

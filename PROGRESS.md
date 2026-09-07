@@ -14,7 +14,7 @@
 | M5 合规门禁 | ✅ | 溯源/克隆门禁/敏感词 |
 | M6 CLI | ✅ | voicecast.bat 全命令可用（design/blend/run/route/engines） |
 | M7 Gradio Web | ✅ | 127.0.0.1:7860（web.bat）；修复 Blocks 嵌套双实例 bug |
-| M8 GitHub 收尾 | 🟡 | README/LICENSE/CI/发布清单就绪，**不 push 等用户批准** |
+| M8 GitHub 收尾 | 🟡 | **发布文件体系建立**（README 发布级/RELEASE 清单/pyproject 0.2.0 依赖修正/gradio 移除），**不 push 等用户批准** |
 | M9 生产级引擎 | ✅ | **GPT-SoVITS v2pro（RTX50版）接入**：api_v2 服务 + HTTP 适配层 + fallback 降级链 |
 | M10 真人参考库 | ✅ | **AISHELL-3**：55 说话人/165 段（性别×年龄A/B/C/D×口音），40 个 3-10s 拼接参考，55 条可路由配方 |
 | M11 去AI味后处理 | ✅ | 呼吸声注入+微颤动+EQ+压缩+混响+LUFS，档位 off/clean/natural |
