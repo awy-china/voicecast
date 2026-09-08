@@ -441,7 +441,7 @@ function renderTapeTable(rows) {
     row.className = "log-line ok";
     row.innerHTML = `<span class="n">${lineNo}</span><span class="st">${esc(role)}</span>` +
       `<span class="detail">${esc(engine)} · ${esc(String(file).split("/").pop())}</span>` +
-      `<span><button class="mini-op" title="试听">▶</button> <button class="mini-op" title="重生成该句">↻</button></span>`;
+      `<span style="margin-left:auto"><button class="mini-op play" title="试听">▶</button> <button class="mini-op" title="重生成该句">↻</button></span>`;
     row.querySelector(".mini-op").addEventListener("click", () => {
       if (rerunAudio) rerunAudio.pause();
       rerunAudio = new Audio(url); rerunAudio.play();

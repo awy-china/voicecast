@@ -20,7 +20,8 @@
   --red: #FF4B4B;
   --green: #3DDC84;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);   /* expoOut */
-  --font: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+  --font-display: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
   --mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
   --spot-x: 50vw; --spot-y: 30vh;
   /* 场景强调色（色彩分段叙事：每功能区一色，Anime.js 式颜色导航） */
@@ -42,8 +43,11 @@ body {
   color: var(--text);
   font-family: var(--font);
   font-size: 15px;
+  line-height: 1.62;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
 }
 
 /* ═══ 全屏波形场 ═══ */
@@ -196,8 +200,9 @@ body {
 .scene-head { margin-bottom: 30px; }
 .big-title {
   font-size: clamp(28px, 4.4vw, 46px);
-  font-weight: 800; letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-weight: 800; letter-spacing: -0.025em;
+  line-height: 1.18;
+  font-family: var(--font-display);
   display: flex; flex-wrap: wrap;
   /* Aceternity 渐变文字：场景色渐变（随场景切换） */
   background: linear-gradient(120deg, var(--text) 30%, var(--acc) 130%);
@@ -218,7 +223,7 @@ body {
   from { transform: translateY(110%); opacity: 0.001; }
   to { transform: none; opacity: 1; }
 }
-.scene-sub { margin-top: 10px; color: var(--text2); font-size: 14.5px; max-width: 560px; }
+.scene-sub { margin-top: 12px; color: var(--text2); font-size: 14.5px; max-width: 580px; line-height: 1.7; }
 
 /* ═══ 输入/按钮 ═══ */
 .big-input {
@@ -237,10 +242,12 @@ body {
 }
 .btn-primary {
   background: linear-gradient(120deg, color-mix(in srgb, var(--acc) 82%, white 18%), var(--acc));
-  color: #08120B; border: none; border-radius: 10px;
-  padding: 0 30px; font-size: 15.5px; font-weight: 700;
+  color: #08120B; border: none; border-radius: 12px;
+  min-height: 52px; padding: 0 32px;
+  font-size: 15px; font-weight: 650; letter-spacing: 0.03em;
   font-family: var(--font); cursor: pointer; white-space: nowrap;
   position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
   transition: transform 0.2s var(--ease-out), box-shadow 0.3s ease;
 }
 .btn-primary::after {
@@ -255,11 +262,15 @@ body {
 .btn-primary:disabled { opacity: 0.5; cursor: wait; transform: none; }
 .btn-ghost {
   background: var(--panel); border: 1px solid var(--edge);
-  color: var(--text2); border-radius: 10px; padding: 12px 22px;
-  font-size: 14px; font-family: var(--font); cursor: pointer;
+  color: var(--text2); border-radius: 12px;
+  min-height: 46px; padding: 0 22px;
+  font-size: 13.5px; font-weight: 550; letter-spacing: 0.02em;
+  font-family: var(--font); cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center;
   transition: all 0.2s ease;
 }
-.btn-ghost:hover { border-color: var(--edge-hi); color: var(--text); }
+.btn-ghost:hover { border-color: var(--edge-hi); color: var(--text); transform: translateY(-1px); }
+.btn-ghost:active { transform: translateY(0); }
 .btn-ghost:disabled { opacity: 0.5; cursor: wait; }
 .mini-input {
   background: var(--panel); border: 1px solid var(--edge);
@@ -366,7 +377,7 @@ body {
 .bm-log .log-line .n { color: var(--text3); }
 .bm-log .ok .st { color: var(--green); }
 .bm-log .err .st { color: var(--red); }
-.bm-log .detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-log .detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .bm-log .log-line { animation: line-in 0.3s ease; }
 @keyframes line-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; } }
 
@@ -375,8 +386,10 @@ body {
 .filter-chips { display: flex; gap: 6px; }
 .chip {
   background: var(--panel); border: 1px solid var(--edge);
-  color: var(--text2); border-radius: 999px; padding: 7px 16px;
-  font-size: 12.5px; font-family: var(--font); cursor: pointer;
+  color: var(--text2); border-radius: 999px; padding: 8px 17px;
+  font-size: 12.5px; font-weight: 500; font-family: var(--font); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 36px;
   transition: all 0.2s ease;
 }
 .chip:hover { border-color: var(--edge-hi); color: var(--text); transform: translateY(-1px); }
@@ -441,7 +454,32 @@ body {
 .statusbar.err { color: var(--red); }
 .clock { color: var(--text2); }
 
+/* 数据/时间/序号统一 tabular 数字 */
+.ri-idx, .timecode, .bm-count, .out-time, .tape-counter,
+.rp-params, .io-input, .mini-input, .tape-count, .clock {
+  font-variant-numeric: tabular-nums;
+}
 .hidden { display: none !important; }
+
+/* 行内操作小按钮（试听/重生成）——统一键帽 */
+.mini-op {
+  background: var(--panel-solid);
+  border: 1px solid var(--edge); border-radius: 7px;
+  color: var(--text2); cursor: pointer;
+  min-width: 30px; height: 26px;
+  font-size: 11px; font-family: var(--font);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+  margin-left: 4px;
+}
+.mini-op:hover { border-color: var(--acc); color: var(--acc); }
+.mini-op.play:hover { border-color: var(--green); color: var(--green); }
+.mini-op:disabled { opacity: 0.5; cursor: wait; }
+
+/* 输入+按钮行对齐 */
+.desc-row { display: flex; gap: 14px; align-items: center; }
+.batch-actions { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+.batch-paths { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
 /* 滚动条 */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
