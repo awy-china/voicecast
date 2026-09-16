@@ -39,3 +39,6 @@ Thumbs.db
 
 # 例外：文档站演示音频（属于资产，入库）
 !docs/audio/*.mp3
+
+# 参考归一化缓存（可由 engines/local_engine.py 自动再生，不入库）
+recipes/samples/ref_normalized/

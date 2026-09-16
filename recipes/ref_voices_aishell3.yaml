@@ -1,3 +1,6 @@
+# 参考音频配方（自动生成：prepare_aishell3.py + build_gptsovits_refs.py）
+# 数据源 AISHELL-3（Apache-2.0）。ref 指向 3-10s 拼接参考（GPT-SoVITS 兼容）。
+# wav 本体不入 git（.gitignore）；ref_text 自动读 samples/ref/<同名>.txt。
 profiles:
 - id: aishell3_SSB0011
   name: 真人参考·女·中年
@@ -110,7 +113,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0288_SSB02880068.wav
+    ref_file: samples/ref/aishell3_SSB0288_ref.wav
   tags:
   - 女
   - 中年
@@ -123,7 +126,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0309_SSB03090042.wav
+    ref_file: samples/ref/aishell3_SSB0309_ref.wav
   tags:
   - 女
   - 老年
@@ -253,7 +256,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0415_SSB04150004.wav
+    ref_file: samples/ref/aishell3_SSB0415_ref.wav
   tags:
   - 女
   - 青年
@@ -279,7 +282,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0534_SSB05340006.wav
+    ref_file: samples/ref/aishell3_SSB0534_ref.wav
   tags:
   - 女
   - 中年
@@ -344,7 +347,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0599_SSB05990126.wav
+    ref_file: samples/ref/aishell3_SSB0599_ref.wav
   tags:
   - 女
   - 中年
@@ -370,7 +373,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0609_SSB06090003.wav
+    ref_file: samples/ref/aishell3_SSB0609_ref.wav
   tags:
   - 男
   - 中年
@@ -396,7 +399,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0629_SSB06290008.wav
+    ref_file: samples/ref/aishell3_SSB0629_ref.wav
   tags:
   - 男
   - 青年
@@ -435,7 +438,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0666_SSB06660002.wav
+    ref_file: samples/ref/aishell3_SSB0666_ref.wav
   tags:
   - 女
   - 中年
@@ -487,7 +490,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB0710_SSB07100003.wav
+    ref_file: samples/ref/aishell3_SSB0710_ref.wav
   tags:
   - 男
   - 中年
@@ -591,7 +594,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1161_SSB11610033.wav
+    ref_file: samples/ref/aishell3_SSB1161_ref.wav
   tags:
   - 女
   - 青年
@@ -617,7 +620,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1448_SSB14480070.wav
+    ref_file: samples/ref/aishell3_SSB1448_ref.wav
   tags:
   - 男
   - 青年
@@ -643,7 +646,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1625_SSB16250005.wav
+    ref_file: samples/ref/aishell3_SSB1625_ref.wav
   tags:
   - 女
   - 中年
@@ -656,7 +659,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1684_SSB16840099.wav
+    ref_file: samples/ref/aishell3_SSB1684_ref.wav
   tags:
   - 男
   - 青年
@@ -682,7 +685,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1828_SSB18280063.wav
+    ref_file: samples/ref/aishell3_SSB1828_ref.wav
   tags:
   - 女
   - 中年
@@ -708,7 +711,7 @@ profiles:
     fallback:
     - local
   params:
-    ref_file: samples/ref/aishell3_SSB1863_SSB18630036.wav
+    ref_file: samples/ref/aishell3_SSB1863_ref.wav
   tags:
   - 男
   - 青年

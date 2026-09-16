@@ -4,6 +4,12 @@
 处理：把每说话人的多段拼接成 1 段 *_ref.wav（含 0.25s 静音间隔），
 文本同步拼接；更新 ref_voices_aishell3.yaml 的 ref_file 指向拼接版。
 F5-TTS 无时长限制，拼接版对其同样可用（参考更长质量更好）。
+
+## v0.3 调整（2026-09-16，依据全库达标率回归）
+原贪心策略"凑够 3s 就停"→ 产出多为 3-5s 参考；改为"**在 10s 上限内尽量填满**"
+（目标 7.5-10s）。实测依据：15 条短参考（2.3-3.8s）换成 8-12s 长参考后，
+F0 偏差合计降低 0.440（对数尺度），8 条改善 / 4 条持平 / 3 条轻微变差。
+上限仍取 10s —— 保持 GPT-SoVITS 兼容（其要求 3-10s），一个 ref 同时服务两个引擎。
 """
 
 from __future__ import annotations
@@ -16,7 +22,7 @@ REPO = Path(__file__).resolve().parents[1]
 REF_DIR = REPO / "recipes" / "samples" / "ref"
 RECIPE = REPO / "recipes" / "ref_voices_aishell3.yaml"
 
-MIN_SEC, MAX_SEC = 3.0, 10.0
+MIN_SEC, MAX_SEC = 7.5, 10.0
 GAP_SEC = 0.25
 
 
@@ -56,17 +62,19 @@ def main() -> None:
         segs = [s for s in segs if "_ref.wav" not in s.name]
         if not segs:
             continue
-        # 贪心拼接：凑够 >=3s（最多 4 段，控制 <=10s）
+        # 贪心拼接：在 MAX_SEC 上限内尽量填满（目标 >= MIN_SEC）
         chosen: list[Path] = []
         total = 0.0
         for s in segs:
             d = duration(s)
-            if total + d + (GAP_SEC if chosen else 0) > MAX_SEC:
+            # 注意：concat 会对**每一段**（含最后一段）补 GAP_SEC 静音，
+            # 而累加器只计段间间隔 —— 故上限要再扣掉一个 GAP，
+            # 否则实际产物会超出 MAX_SEC（踩过：出现 10.13s > 10s 上限）
+            if total + d + (GAP_SEC if chosen else 0) > MAX_SEC - GAP_SEC:
                 continue
             chosen.append(s)
             total += d + (GAP_SEC if len(chosen) > 1 else 0)
-            if total >= MIN_SEC:
-                break
+        # 用尽全部片段仍未达 MIN_SEC 时，只要 >=2 段就接受（不再强求）
         if len(chosen) < 2:
             print(f"  ⚠️ {sid}: 段不足，跳过")
             continue
