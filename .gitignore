@@ -36,3 +36,6 @@ models/
 Thumbs.db
 .DS_Store
 .cache_tmp/
+
+# 例外：文档站演示音频（属于资产，入库）
+!docs/audio/*.mp3

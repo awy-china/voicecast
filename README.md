@@ -8,6 +8,8 @@
 
 **本地优先、零供应商依赖**——无任何 API key 也能全流程运行；GPT-SoVITS / F5-TTS / edge-tts / MiniMax 都是可插拔引擎。
 
+> 🎧 **在线试听（6 种音色 · 同一句台词对比）**：<https://awy-china.github.io/voicecast/>
+>
 > ⚠️ 项目仍处开发期（Beta）。界面（Web 前端）与引擎层持续迭代中。
 
 ---
