@@ -185,6 +185,8 @@ class LocalEngine(Engine):
             wav, sr, _spec = model.infer(**infer_kw)
         # 输出峰值安全兜底：F5-TTS 输出为 float，未限幅音色会过冲；
         # 直接写 PCM_16 会硬削波（实测 peak 最高 2.17）。此处按比例收，不产生失真。
+        if hasattr(wav, "detach"):  # 某些版本返回 tensor，先回 CPU
+            wav = wav.detach().cpu().numpy()
         wav = np.asarray(wav, dtype="float32").reshape(-1)
         peak = float(np.max(np.abs(wav)))
         if peak > OUT_SAFE_PEAK:
@@ -194,8 +196,6 @@ class LocalEngine(Engine):
         # pitch 微调：ffmpeg 变速变调（asetrate + atempo 保持时长）
         # 注意：采样率必须取自实际产物（本引擎为 24000Hz），不可硬编码 44100。
         if abs(pitch_cents) >= 1:
-            import soundfile as sf  # noqa: F811
-
             shifted = out_path.with_suffix(".shift.wav")
             factor = 2 ** (pitch_cents / 1200)
             src_rate = int(sf.info(str(out_path)).samplerate)
